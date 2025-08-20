@@ -11,7 +11,15 @@ import {
   CreateHouseholdDto,
   ImportResult,
   CsvPreviewRow,
-  Category
+  Category,
+  BankConnection,
+  CreateBankConnectionDto,
+  BankConnectionResult,
+  ExternalAccount,
+  ExternalTransaction,
+  ImportExternalTransactionsDto,
+  LinkAccountDto,
+  Bank
 } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5291/api';
@@ -203,6 +211,64 @@ class ApiService {
         { id: 9, name: 'Övrigt', color: '#B0BEC5', icon: 'category', scope: 2, createdAt: '' }
       ];
     }
+  }
+
+  // PSD2/Open Banking methods
+  async getBankConnections(): Promise<BankConnection[]> {
+    const response = await axios.get(`${API_BASE_URL}/psd2/connections`);
+    return response.data;
+  }
+
+  async createBankConnection(dto: CreateBankConnectionDto): Promise<BankConnectionResult> {
+    const response = await axios.post(`${API_BASE_URL}/psd2/connections`, dto);
+    return response.data;
+  }
+
+  async completeBankConnection(connectionId: string, authorizationCode: string): Promise<void> {
+    await axios.post(`${API_BASE_URL}/psd2/connections/${connectionId}/complete`, authorizationCode, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  async disconnectBank(connectionId: number): Promise<void> {
+    await axios.delete(`${API_BASE_URL}/psd2/connections/${connectionId}`);
+  }
+
+  async getExternalAccounts(connectionId: number): Promise<ExternalAccount[]> {
+    const response = await axios.get(`${API_BASE_URL}/psd2/connections/${connectionId}/accounts`);
+    return response.data;
+  }
+
+  async getExternalTransactions(externalAccountId: number, fromDate?: string, toDate?: string): Promise<ExternalTransaction[]> {
+    const params = new URLSearchParams();
+    if (fromDate) params.append('fromDate', fromDate);
+    if (toDate) params.append('toDate', toDate);
+    
+    const response = await axios.get(`${API_BASE_URL}/psd2/accounts/${externalAccountId}/transactions?${params}`);
+    return response.data;
+  }
+
+  async importExternalTransactions(dto: ImportExternalTransactionsDto): Promise<ImportResult> {
+    const response = await axios.post(`${API_BASE_URL}/psd2/import`, dto);
+    return response.data;
+  }
+
+  async syncBankConnection(connectionId: number): Promise<void> {
+    await axios.post(`${API_BASE_URL}/psd2/connections/${connectionId}/sync`);
+  }
+
+  async linkAccount(dto: LinkAccountDto): Promise<void> {
+    await axios.post(`${API_BASE_URL}/psd2/accounts/link`, dto);
+  }
+
+  async checkConsentExpiry(): Promise<{ hasExpiringConsents: boolean }> {
+    const response = await axios.get(`${API_BASE_URL}/psd2/consent-check`);
+    return response.data;
+  }
+
+  async getAvailableBanks(): Promise<Bank[]> {
+    const response = await axios.get(`${API_BASE_URL}/psd2/banks`);
+    return response.data;
   }
 }
 

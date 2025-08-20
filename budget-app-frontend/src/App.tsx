@@ -13,6 +13,7 @@ import Accounts from './components/Accounts/Accounts';
 import Transactions from './components/Transactions/Transactions';
 import Households from './components/Households/Households';
 import Import from './components/Import/Import';
+import BankConnections from './components/PSD2/BankConnections';
 import Layout from './components/Layout/Layout';
 import './App.css';
 
@@ -58,6 +59,7 @@ function AppRoutes() {
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/households" element={<Households />} />
         <Route path="/import" element={<Import />} />
+        <Route path="/bank-connections" element={<BankConnections accounts={[]} />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
