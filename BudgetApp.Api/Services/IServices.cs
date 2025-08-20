@@ -1,0 +1,36 @@
+using BudgetApp.Api.Models;
+using BudgetApp.Api.DTOs;
+
+namespace BudgetApp.Api.Services;
+
+public interface IAuthService
+{
+    Task<AuthResult> RegisterAsync(RegisterDto model);
+    Task<AuthResult> LoginAsync(LoginDto model);
+    Task<AuthResult> RefreshTokenAsync(string token);
+}
+
+public interface ICsvImportService
+{
+    Task<ImportResult> ImportCsvAsync(Stream csvStream, string fileName, int accountId, string userId);
+    Task<List<CsvPreviewRow>> PreviewCsvAsync(Stream csvStream, string fileName);
+}
+
+public interface ITransactionService
+{
+    Task<List<Transaction>> GetTransactionsAsync(string userId, int? accountId = null, int? householdId = null);
+    Task<Transaction> CreateTransactionAsync(CreateTransactionDto dto, string userId);
+    Task<Transaction> UpdateTransactionAsync(int id, UpdateTransactionDto dto, string userId);
+    Task<bool> DeleteTransactionAsync(int id, string userId);
+    Task ApplyCategoryRulesAsync(int transactionId);
+}
+
+public interface IHouseholdService
+{
+    Task<Household> CreateHouseholdAsync(CreateHouseholdDto dto, string userId);
+    Task<List<Household>> GetUserHouseholdsAsync(string userId);
+    Task<Household> GetHouseholdAsync(int id, string userId);
+    Task<bool> AddMemberAsync(int householdId, string email, string userId);
+    Task<bool> RemoveMemberAsync(int householdId, string memberUserId, string userId);
+    Task<List<Settlement>> CalculateSettlementsAsync(int householdId);
+}
