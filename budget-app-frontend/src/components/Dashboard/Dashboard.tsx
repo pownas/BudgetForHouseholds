@@ -17,6 +17,7 @@ import {
   Receipt as TransactionIcon,
   Group as HouseholdIcon,
   TrendingUp as TrendingUpIcon,
+  AttachFile as AttachFileIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
@@ -195,19 +196,24 @@ const Dashboard: React.FC = () => {
                       primary={transaction.description}
                       secondary={formatDate(transaction.date)}
                     />
-                    <Box textAlign="right">
-                      <Typography
-                        variant="body2"
-                        color={transaction.amount >= 0 ? 'success.main' : 'error.main'}
-                      >
-                        {formatCurrency(transaction.amount)}
-                      </Typography>
-                      {transaction.category && (
-                        <Chip
-                          label={transaction.category.name}
-                          size="small"
-                          sx={{ mt: 0.5 }}
-                        />
+                    <Box textAlign="right" display="flex" alignItems="center" gap={1}>
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          color={transaction.amount >= 0 ? 'success.main' : 'error.main'}
+                        >
+                          {formatCurrency(transaction.amount)}
+                        </Typography>
+                        {transaction.category && (
+                          <Chip
+                            label={transaction.category.name}
+                            size="small"
+                            sx={{ mt: 0.5 }}
+                          />
+                        )}
+                      </Box>
+                      {transaction.attachments && transaction.attachments.length > 0 && (
+                        <AttachFileIcon fontSize="small" color="action" />
                       )}
                     </Box>
                   </ListItem>

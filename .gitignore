@@ -28,6 +28,9 @@ yarn-error.log*
 *.sqlite
 *.sqlite3
 
+# File uploads
+**/uploads/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

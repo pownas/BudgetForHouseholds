@@ -11,7 +11,8 @@ import {
   CreateHouseholdDto,
   ImportResult,
   CsvPreviewRow,
-  Category
+  Category,
+  TransactionAttachment
 } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5291/api';
@@ -134,6 +135,33 @@ class ApiService {
 
   async deleteTransaction(id: number): Promise<void> {
     await axios.delete(`${API_BASE_URL}/transactions/${id}`);
+  }
+
+  // Transaction attachment methods
+  async uploadAttachment(transactionId: number, file: File): Promise<TransactionAttachment> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await axios.post(`${API_BASE_URL}/transactions/${transactionId}/attachments`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+
+  async getAttachment(transactionId: number, attachmentId: number): Promise<TransactionAttachment> {
+    const response = await axios.get(`${API_BASE_URL}/transactions/${transactionId}/attachments/${attachmentId}`);
+    return response.data;
+  }
+
+  async downloadAttachment(transactionId: number, attachmentId: number): Promise<Blob> {
+    const response = await axios.get(`${API_BASE_URL}/transactions/${transactionId}/attachments/${attachmentId}/download`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  }
+
+  async deleteAttachment(transactionId: number, attachmentId: number): Promise<void> {
+    await axios.delete(`${API_BASE_URL}/transactions/${transactionId}/attachments/${attachmentId}`);
   }
 
   // Household methods

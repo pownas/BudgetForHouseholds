@@ -70,6 +70,7 @@ export interface Transaction {
   category?: Category;
   splits?: TransactionSplit[];
   tags?: TransactionTag[];
+  attachments?: TransactionAttachment[];
 }
 
 export enum SharingStatus {
@@ -91,6 +92,17 @@ export interface TransactionTag {
   id: number;
   transactionId: number;
   tag: string;
+}
+
+export interface TransactionAttachment {
+  id: number;
+  transactionId: number;
+  fileName: string;
+  filePath: string;
+  contentType?: string;
+  fileSize: number;
+  fileHash?: string;
+  uploadedAt: string;
 }
 
 export interface Category {
