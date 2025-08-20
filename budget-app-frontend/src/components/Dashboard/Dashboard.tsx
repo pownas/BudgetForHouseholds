@@ -11,21 +11,24 @@ import {
   Avatar,
   Chip,
   Skeleton,
+  LinearProgress,
 } from '@mui/material';
 import {
   AccountBalance as AccountIcon,
   Receipt as TransactionIcon,
   Group as HouseholdIcon,
   TrendingUp as TrendingUpIcon,
+  Category as CategoryIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
-import { Account, Transaction, Household } from '../../types';
+import { Account, Transaction, Household, Category } from '../../types';
 
 const Dashboard: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [households, setHouseholds] = useState<Household[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -35,15 +38,17 @@ const Dashboard: React.FC = () => {
 
   const loadDashboardData = async () => {
     try {
-      const [accountsData, transactionsData, householdsData] = await Promise.all([
+      const [accountsData, transactionsData, householdsData, categoriesData] = await Promise.all([
         apiService.getAccounts(),
         apiService.getTransactions(),
         apiService.getHouseholds(),
+        apiService.getCategories(),
       ]);
 
       setAccounts(accountsData);
-      setTransactions(transactionsData.slice(0, 5)); // Show only latest 5
+      setTransactions(transactionsData);
       setHouseholds(householdsData);
+      setCategories(categoriesData);
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
@@ -56,6 +61,27 @@ const Dashboard: React.FC = () => {
     (t) => new Date(t.date).getMonth() === new Date().getMonth()
   );
   const thisMonthTotal = thisMonthTransactions.reduce((sum, t) => sum + t.amount, 0);
+
+  // Calculate category statistics for current month
+  const categoryStats = categories.map(category => {
+    const categoryTransactions = thisMonthTransactions.filter(t => t.categoryId === category.id);
+    const total = categoryTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const count = categoryTransactions.length;
+    return {
+      ...category,
+      total,
+      count,
+      isIncome: category.name === 'Inkomst' || total > 0
+    };
+  }).filter(stat => stat.count > 0); // Only show categories with transactions
+
+  // Separate income and expenses
+  const incomeCategories = categoryStats.filter(stat => stat.total > 0);
+  const expenseCategories = categoryStats.filter(stat => stat.total < 0);
+
+  // Calculate totals for percentage calculations
+  const totalIncome = incomeCategories.reduce((sum, cat) => sum + cat.total, 0);
+  const totalExpenses = Math.abs(expenseCategories.reduce((sum, cat) => sum + cat.total, 0));
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('sv-SE', {
@@ -170,6 +196,134 @@ const Dashboard: React.FC = () => {
         </Card>
       </Box>
 
+      {/* Category Overview */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <CategoryIcon />
+          Kategoriöversikt denna månad
+        </Typography>
+        
+        <Box display="flex" flexWrap="wrap" gap={3}>
+          {/* Income Categories */}
+          <Card sx={{ minWidth: 300, flex: '1 1 300px' }}>
+            <CardContent>
+                <Typography variant="h6" gutterBottom color="success.main">
+                  Inkomster ({formatCurrency(totalIncome)})
+                </Typography>
+                {incomeCategories.length === 0 ? (
+                  <Typography color="textSecondary">
+                    Inga inkomster denna månad
+                  </Typography>
+                ) : (
+                  <Box>
+                    {incomeCategories.map((category) => {
+                      const percentage = totalIncome > 0 ? (category.total / totalIncome) * 100 : 0;
+                      return (
+                        <Box key={category.id} sx={{ mb: 2 }}>
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Chip
+                                label={category.name}
+                                size="small"
+                                sx={{ 
+                                  backgroundColor: category.color,
+                                  color: '#fff',
+                                  fontWeight: 'bold'
+                                }}
+                              />
+                              <Typography variant="body2">
+                                {category.count} transaktion{category.count !== 1 ? 'er' : ''}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight="bold" color="success.main">
+                              {formatCurrency(category.total)}
+                            </Typography>
+                          </Box>
+                          <LinearProgress
+                            variant="determinate"
+                            value={percentage}
+                            sx={{
+                              height: 8,
+                              borderRadius: 4,
+                              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                              '& .MuiLinearProgress-bar': {
+                                backgroundColor: category.color,
+                                borderRadius: 4,
+                              },
+                            }}
+                          />
+                          <Typography variant="caption" color="textSecondary">
+                            {percentage.toFixed(1)}% av totala inkomster
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+
+          {/* Expense Categories */}
+          <Card sx={{ minWidth: 300, flex: '1 1 300px' }}>
+            <CardContent>
+                <Typography variant="h6" gutterBottom color="error.main">
+                  Utgifter ({formatCurrency(-totalExpenses)})
+                </Typography>
+                {expenseCategories.length === 0 ? (
+                  <Typography color="textSecondary">
+                    Inga utgifter denna månad
+                  </Typography>
+                ) : (
+                  <Box>
+                    {expenseCategories.map((category) => {
+                      const percentage = totalExpenses > 0 ? (Math.abs(category.total) / totalExpenses) * 100 : 0;
+                      return (
+                        <Box key={category.id} sx={{ mb: 2 }}>
+                          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Chip
+                                label={category.name}
+                                size="small"
+                                sx={{ 
+                                  backgroundColor: category.color,
+                                  color: '#fff',
+                                  fontWeight: 'bold'
+                                }}
+                              />
+                              <Typography variant="body2">
+                                {category.count} transaktion{category.count !== 1 ? 'er' : ''}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight="bold" color="error.main">
+                              {formatCurrency(category.total)}
+                            </Typography>
+                          </Box>
+                          <LinearProgress
+                            variant="determinate"
+                            value={percentage}
+                            sx={{
+                              height: 8,
+                              borderRadius: 4,
+                              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                              '& .MuiLinearProgress-bar': {
+                                backgroundColor: category.color,
+                                borderRadius: 4,
+                              },
+                            }}
+                          />
+                          <Typography variant="caption" color="textSecondary">
+                            {percentage.toFixed(1)}% av totala utgifter
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+        </Box>
+      </Box>
+
       <Box display="flex" flexWrap="wrap" gap={3}>
         {/* Recent Transactions */}
         <Card sx={{ minWidth: 300, flex: '1 1 300px' }}>
@@ -189,7 +343,7 @@ const Dashboard: React.FC = () => {
               </Typography>
             ) : (
               <List dense>
-                {transactions.map((transaction) => (
+                {transactions.slice(0, 5).map((transaction) => (
                   <ListItem key={transaction.id} divider>
                     <ListItemText
                       primary={transaction.description}
