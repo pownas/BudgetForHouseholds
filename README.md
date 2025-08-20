@@ -43,7 +43,15 @@ En privatekonomi app för budget och kostnadssplit mellan sambos. Denna MVP impl
 - Node.js 18+
 - npm eller yarn
 
-### Backend (API)
+### Snabbstart (Rekommenderat)
+```bash
+./run-dev.sh
+```
+Detta script startar automatiskt både backend och frontend med alla nödvändiga beroenden.
+
+### Manuell start
+
+#### Backend (API)
 ```bash
 cd BudgetApp.Api
 dotnet restore
@@ -51,7 +59,7 @@ dotnet run
 ```
 API:t kommer att köras på `http://localhost:5291`
 
-### Frontend
+#### Frontend
 ```bash
 cd budget-app-frontend
 npm install
