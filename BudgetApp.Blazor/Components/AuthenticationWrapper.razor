@@ -1,0 +1,21 @@
+@using BudgetApp.Blazor.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+@if (AuthService.IsAuthenticated)
+{
+    @ChildContent
+}
+else
+{
+    @* Redirect to login if not authenticated *@
+    var returnUrl = Navigation.Uri;
+    if (!returnUrl.Contains("/login") && !returnUrl.Contains("/register"))
+    {
+        Navigation.NavigateTo("/login", forceLoad: true);
+    }
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

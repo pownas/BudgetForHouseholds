@@ -1,0 +1,145 @@
+@page "/register"
+@using BudgetApp.Blazor.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+
+<PageTitle>Registrera dig - Budget App</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Elevation="2" Class="pa-8">
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+            Budget App
+        </MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-6">
+            Skapa ett nytt konto
+        </MudText>
+
+        <EditForm Model="@registerModel" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <MudGrid>
+                <MudItem xs="6">
+                    <MudTextField Label="Förnamn"
+                                  @bind-Value="registerModel.FirstName"
+                                  For="@(() => registerModel.FirstName)"
+                                  Variant="Variant.Outlined"
+                                  Required="true" />
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="Efternamn"
+                                  @bind-Value="registerModel.LastName"
+                                  For="@(() => registerModel.LastName)"
+                                  Variant="Variant.Outlined"
+                                  Required="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="E-post"
+                                  @bind-Value="registerModel.Email"
+                                  For="@(() => registerModel.Email)"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  InputType="InputType.Email" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Lösenord"
+                                  @bind-Value="registerModel.Password"
+                                  For="@(() => registerModel.Password)"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  InputType="InputType.Password" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Bekräfta lösenord"
+                                  @bind-Value="registerModel.ConfirmPassword"
+                                  For="@(() => registerModel.ConfirmPassword)"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  InputType="InputType.Password" />
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               Disabled="@isLoading"
+                               Class="mt-4">
+                        @if (isLoading)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Registrerar...</MudText>
+                        }
+                        else
+                        {
+                            <text>Registrera dig</text>
+                        }
+                    </MudButton>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudText>
+                        Har du redan ett konto? 
+                        <MudLink Href="/login" Color="Color.Primary">Logga in här</MudLink>
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private RegisterModel registerModel = new();
+    private bool isLoading = false;
+
+    private async Task OnValidSubmit()
+    {
+        isLoading = true;
+        
+        try
+        {
+            var result = await AuthService.RegisterAsync(
+                registerModel.FirstName, 
+                registerModel.LastName, 
+                registerModel.Email, 
+                registerModel.Password);
+            
+            if (result.Success)
+            {
+                Snackbar.Add("Registrering lyckades! Du är nu inloggad.", Severity.Success);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                Snackbar.Add(result.Error ?? "Registrering misslyckades", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Ett fel uppstod: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class RegisterModel
+    {
+        [Required(ErrorMessage = "Förnamn är obligatoriskt")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Efternamn är obligatoriskt")]
+        public string LastName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "E-post är obligatoriskt")]
+        [EmailAddress(ErrorMessage = "Ange en giltig e-postadress")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Lösenord är obligatoriskt")]
+        [MinLength(6, ErrorMessage = "Lösenordet måste vara minst 6 tecken")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Bekräfta lösenord är obligatoriskt")]
+        [Compare(nameof(Password), ErrorMessage = "Lösenorden matchar inte")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

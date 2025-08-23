@@ -1,0 +1,40 @@
+﻿@using BudgetApp.Blazor.Services
+@inject IAuthService AuthService
+
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        @{
+            var isAuthPage = routeData.PageType == typeof(Components.Pages.Login) || 
+                           routeData.PageType == typeof(Components.Pages.Register);
+        }
+        
+        @if (isAuthPage || AuthService.IsAuthenticated)
+        {
+            <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        }
+        else
+        {
+            <RouteView RouteData="@(new RouteData(typeof(Components.Pages.Login), new Dictionary<string, object?>()))" DefaultLayout="typeof(Layout.MainLayout)" />
+        }
+    </Found>
+    <NotFound>
+        @if (AuthService.IsAuthenticated)
+        {
+            <PageTitle>Sidan hittades inte</PageTitle>
+            <LayoutView Layout="typeof(Layout.MainLayout)">
+                <MudContainer>
+                    <MudAlert Severity="Severity.Warning">
+                        <MudText Typo="Typo.h6">Sidan hittades inte</MudText>
+                        <MudText>Den begärda sidan kunde inte hittas.</MudText>
+                        <MudButton Href="/" Color="Color.Primary" Class="mt-2">Gå till startsidan</MudButton>
+                    </MudAlert>
+                </MudContainer>
+            </LayoutView>
+        }
+        else
+        {
+            <RouteView RouteData="@(new RouteData(typeof(Components.Pages.Login), new Dictionary<string, object?>()))" DefaultLayout="typeof(Layout.MainLayout)" />
+        }
+    </NotFound>
+</Router>

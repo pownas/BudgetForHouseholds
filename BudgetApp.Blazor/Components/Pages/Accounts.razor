@@ -1,0 +1,237 @@
+@page "/accounts"
+@using BudgetApp.Blazor.Services
+@inject IApiService ApiService
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+
+<PageTitle>Konton - Budget App</PageTitle>
+
+<MudGrid>
+    <MudItem xs="12">
+        <div class="d-flex justify-space-between align-center mb-4">
+            <MudText Typo="Typo.h4">Konton</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="Icons.Material.Filled.Add" OnClick="OpenCreateDialog">
+                Skapa konto
+            </MudButton>
+        </div>
+    </MudItem>
+
+    @if (loading)
+    {
+        <MudItem xs="12">
+            <MudProgressLinear Indeterminate="true" />
+        </MudItem>
+    }
+    else if (!accounts.Any())
+    {
+        <MudItem xs="12">
+            <MudAlert Severity="Severity.Info">
+                Du har inga konton än. Skapa ditt första konto för att komma igång!
+            </MudAlert>
+        </MudItem>
+    }
+    else
+    {
+        @foreach (var account in accounts)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <div class="d-flex justify-space-between align-center mb-2">
+                            <MudText Typo="Typo.h6">@account.Name</MudText>
+                            <MudChip T="string" Size="Size.Small" Text="@GetAccountTypeText(account.Type)" />
+                        </div>
+                        <MudText Typo="Typo.h4" Color="@(account.CurrentBalance >= 0 ? Color.Success : Color.Error)">
+                            @FormatCurrency(account.CurrentBalance)
+                        </MudText>
+                        @if (!string.IsNullOrEmpty(account.Description))
+                        {
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                                @account.Description
+                            </MudText>
+                        }
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mt-2">
+                            Uppdaterad: @account.UpdatedAt.ToString("yyyy-MM-dd HH:mm")
+                        </MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Size="Size.Small" Color="Color.Primary" OnClick="@(() => EditAccount(account))">
+                            Redigera
+                        </MudButton>
+                        <MudButton Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteAccount(account))">
+                            Ta bort
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    }
+</MudGrid>
+
+<!-- Create/Edit Account Dialog -->
+<MudDialog @bind-Visible="showDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">
+            @(editingAccount == null ? "Skapa nytt konto" : "Redigera konto")
+        </MudText>
+        
+        <EditForm Model="@accountModel" OnValidSubmit="SaveAccount">
+            <DataAnnotationsValidator />
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField Label="Kontonamn"
+                                  @bind-Value="accountModel.Name"
+                                  For="@(() => accountModel.Name)"
+                                  Variant="Variant.Outlined"
+                                  Required="true" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudSelect T="AccountType" Label="Kontotyp" @bind-Value="accountModel.Type" Variant="Variant.Outlined">
+                        <MudSelectItem T="AccountType" Value="AccountType.BankAccount">Bankkonto</MudSelectItem>
+                        <MudSelectItem T="AccountType" Value="AccountType.SavingsAccount">Sparkonto</MudSelectItem>
+                        <MudSelectItem T="AccountType" Value="AccountType.CreditCard">Kreditkort</MudSelectItem>
+                        <MudSelectItem T="AccountType" Value="AccountType.Cash">Kontanter</MudSelectItem>
+                        <MudSelectItem T="AccountType" Value="AccountType.Debt">Skuld</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudNumericField T="decimal" Label="Nuvarande saldo" @bind-Value="accountModel.CurrentBalance" Variant="Variant.Outlined" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Beskrivning"
+                                  @bind-Value="accountModel.Description"
+                                  Variant="Variant.Outlined"
+                                  Lines="3" />
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseDialog">Avbryt</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SaveAccount" Disabled="@isSaving">
+            @if (isSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            }
+            @(editingAccount == null ? "Skapa" : "Spara")
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<Account> accounts = new();
+    private bool loading = true;
+    private bool showDialog = false;
+    private bool isSaving = false;
+    private Account? editingAccount = null;
+    private CreateAccountDto accountModel = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAccounts();
+    }
+
+    private async Task LoadAccounts()
+    {
+        loading = true;
+        try
+        {
+            accounts = await ApiService.GetAccountsAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid laddning av konton: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void OpenCreateDialog()
+    {
+        editingAccount = null;
+        accountModel = new CreateAccountDto();
+        showDialog = true;
+    }
+
+    private void EditAccount(Account account)
+    {
+        editingAccount = account;
+        accountModel = new CreateAccountDto
+        {
+            Name = account.Name,
+            Type = account.Type,
+            SharingType = account.SharingType,
+            CurrentBalance = account.CurrentBalance,
+            Description = account.Description,
+            HouseholdId = account.HouseholdId
+        };
+        showDialog = true;
+    }
+
+    private void CloseDialog()
+    {
+        showDialog = false;
+        editingAccount = null;
+        accountModel = new CreateAccountDto();
+    }
+
+    private async Task SaveAccount()
+    {
+        isSaving = true;
+        try
+        {
+            if (editingAccount == null)
+            {
+                await ApiService.CreateAccountAsync(accountModel);
+                Snackbar.Add("Konto skapat!", Severity.Success);
+            }
+            else
+            {
+                await ApiService.UpdateAccountAsync(editingAccount.Id, accountModel);
+                Snackbar.Add("Konto uppdaterat!", Severity.Success);
+            }
+
+            CloseDialog();
+            await LoadAccounts();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid sparande: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task DeleteAccount(Account account)
+    {
+        try
+        {
+            await ApiService.DeleteAccountAsync(account.Id);
+            Snackbar.Add("Konto borttaget!", Severity.Success);
+            await LoadAccounts();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid borttagning: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private string GetAccountTypeText(AccountType type) => type switch
+    {
+        AccountType.BankAccount => "Bankkonto",
+        AccountType.SavingsAccount => "Sparkonto",
+        AccountType.CreditCard => "Kreditkort",
+        AccountType.Cash => "Kontanter",
+        AccountType.Debt => "Skuld",
+        _ => type.ToString()
+    };
+
+    private string FormatCurrency(decimal amount)
+    {
+        return amount.ToString("C", new System.Globalization.CultureInfo("sv-SE"));
+    }
+}

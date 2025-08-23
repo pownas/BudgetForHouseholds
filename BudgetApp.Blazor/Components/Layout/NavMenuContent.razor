@@ -1,0 +1,30 @@
+@inject NavigationManager Navigation
+
+<MudNavMenu>
+    <MudText Typo="Typo.h6" Class="px-4 py-2">Budget App</MudText>
+    <MudDivider Class="mb-2" />
+    
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="Icons.Material.Filled.Dashboard">
+        Dashboard
+    </MudNavLink>
+    
+    <MudNavLink Href="/accounts" Match="NavLinkMatch.Prefix" Icon="Icons.Material.Filled.AccountBalance">
+        Konton
+    </MudNavLink>
+    
+    <MudNavLink Href="/transactions" Match="NavLinkMatch.Prefix" Icon="Icons.Material.Filled.Receipt">
+        Transaktioner
+    </MudNavLink>
+    
+    <MudNavLink Href="/households" Match="NavLinkMatch.Prefix" Icon="Icons.Material.Filled.Group">
+        Hushåll
+    </MudNavLink>
+    
+    <MudNavLink Href="/import" Match="NavLinkMatch.Prefix" Icon="Icons.Material.Filled.CloudUpload">
+        Import
+    </MudNavLink>
+    
+    <MudNavLink Href="/bank-connections" Match="NavLinkMatch.Prefix" Icon="Icons.Material.Filled.Link">
+        Bankförbindelser
+    </MudNavLink>
+</MudNavMenu>
