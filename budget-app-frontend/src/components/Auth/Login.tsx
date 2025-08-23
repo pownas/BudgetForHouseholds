@@ -36,6 +36,13 @@ const Login: React.FC = () => {
 
   return (
     <Container component="main" maxWidth="xs">
+      <Box sx={{ mb: 2, mt: 4 }}>
+        <Alert severity="info">
+          <strong>Demoanvändare:</strong><br />
+          E-post: <b>demo@demo.se</b><br />
+          Lösenord: <b>Demo123!</b>
+        </Alert>
+      </Box>
       <Box
         sx={{
           marginTop: 8,

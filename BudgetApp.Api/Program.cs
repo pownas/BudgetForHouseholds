@@ -59,6 +59,7 @@ builder.Services.AddScoped<ICsvImportService, CsvImportService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IPsd2Service, Psd2Service>();
+builder.Services.AddScoped<IReceiptAttachmentService, ReceiptAttachmentService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -114,6 +115,23 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BudgetAppDbContext>();
     context.Database.EnsureCreated();
+
+    // Skapa demoanvändare om den inte finns
+    var userManager = scope.ServiceProvider.GetService<UserManager<User>>();
+    if (userManager != null)
+    {
+        var demoUser = await userManager.FindByEmailAsync("demo@demo.se");
+        if (demoUser == null)
+        {
+            var newUser = new User
+            {
+                UserName = "demo@demo.se",
+                Email = "demo@demo.se",
+                EmailConfirmed = true
+            };
+            await userManager.CreateAsync(newUser, "Demo123!");
+        }
+    }
 }
 
 app.UseHttpsRedirection();

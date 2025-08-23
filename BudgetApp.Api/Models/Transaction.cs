@@ -43,7 +43,8 @@ public class Transaction
     [MaxLength(100)]
     public string? ExternalReference { get; set; } // For PSD2 transaction reference
 
-    [MaxLength(64)]
+    public int? ReceiptAttachmentId { get; set; }
+    public virtual ReceiptAttachment ReceiptAttachment { get; set; } = null!;
     public string? ImportHash { get; set; } // For duplicate detection
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
