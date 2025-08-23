@@ -22,6 +22,7 @@ public class BudgetAppDbContext : IdentityDbContext<User>
     public DbSet<Budget> Budgets { get; set; }
     public DbSet<Settlement> Settlements { get; set; }
     public DbSet<ImportJob> ImportJobs { get; set; }
+        public DbSet<ReceiptAttachment> ReceiptAttachments { get; set; }
     
     // PSD2/Open Banking entities
     public DbSet<BankConnection> BankConnections { get; set; }
@@ -40,6 +41,13 @@ public class BudgetAppDbContext : IdentityDbContext<User>
             .HasOne(hm => hm.Household)
             .WithMany(h => h.Members)
             .HasForeignKey(hm => hm.HouseholdId);
+
+        // 1:1 Transaction <-> ReceiptAttachment
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.ReceiptAttachment)
+            .WithOne(r => r.Transaction)
+            .HasForeignKey<ReceiptAttachment>(r => r.TransactionId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         modelBuilder.Entity<HouseholdMember>()
             .HasOne(hm => hm.User)
