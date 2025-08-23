@@ -24,6 +24,7 @@ import {
   Group as HouseholdIcon,
   CloudUpload as ImportIcon,
   Logout as LogoutIcon,
+  Link as BankConnectionIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -57,6 +58,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: 'Transaktioner', icon: <TransactionIcon />, path: '/transactions' },
     { text: 'Hushåll', icon: <HouseholdIcon />, path: '/households' },
     { text: 'Import', icon: <ImportIcon />, path: '/import' },
+    { text: 'Bankförbindelser', icon: <BankConnectionIcon />, path: '/bank-connections' },
   ];
 
   const drawer = (

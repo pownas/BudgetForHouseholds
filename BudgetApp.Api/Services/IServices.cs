@@ -34,3 +34,17 @@ public interface IHouseholdService
     Task<bool> RemoveMemberAsync(int householdId, string memberUserId, string userId);
     Task<List<Settlement>> CalculateSettlementsAsync(int householdId);
 }
+
+public interface IPsd2Service
+{
+    Task<List<BankConnectionDto>> GetUserBankConnectionsAsync(string userId);
+    Task<BankConnectionResultDto> CreateBankConnectionAsync(CreateBankConnectionDto dto, string userId);
+    Task<bool> CompleteBankConnectionAsync(string connectionId, string authorizationCode, string userId);
+    Task<bool> DisconnectBankAsync(int connectionId, string userId);
+    Task<List<ExternalAccountDto>> GetExternalAccountsAsync(int connectionId, string userId);
+    Task<List<ExternalTransactionDto>> GetExternalTransactionsAsync(int externalAccountId, DateTime? fromDate, DateTime? toDate, string userId);
+    Task<ImportResult> ImportExternalTransactionsAsync(ImportExternalTransactionsDto dto, string userId);
+    Task<bool> SyncBankConnectionAsync(int connectionId, string userId);
+    Task<bool> LinkAccountAsync(LinkAccountDto dto, string userId);
+    Task<bool> CheckConsentExpiryAsync(string userId);
+}

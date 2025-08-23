@@ -10,6 +10,10 @@ public class Transaction
     public int AccountId { get; set; }
     public virtual Account Account { get; set; } = null!;
 
+    [Required]
+    public string OwnerId { get; set; } = string.Empty;
+    public virtual User Owner { get; set; } = null!;
+
     public DateTime Date { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
@@ -35,6 +39,9 @@ public class Transaction
 
     [MaxLength(100)]
     public string? ExternalId { get; set; } // For import deduplication
+
+    [MaxLength(100)]
+    public string? ExternalReference { get; set; } // For PSD2 transaction reference
 
     [MaxLength(64)]
     public string? ImportHash { get; set; } // For duplicate detection

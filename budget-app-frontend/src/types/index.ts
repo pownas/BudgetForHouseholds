@@ -181,3 +181,89 @@ export interface CsvPreviewRow {
   rowNumber: number;
   data: { [key: string]: string };
 }
+
+// PSD2/Open Banking types
+export interface BankConnection {
+  id: number;
+  bankName: string;
+  bankId: string;
+  status: ConnectionStatus;
+  consentGivenAt: string;
+  consentExpiresAt?: string;
+  lastSyncAt?: string;
+  errorMessage?: string;
+  accountCount: number;
+}
+
+export enum ConnectionStatus {
+  Pending = 0,
+  Active = 1,
+  ConsentExpired = 2,
+  Error = 3,
+  Disconnected = 4
+}
+
+export interface CreateBankConnectionDto {
+  bankId: string;
+  redirectUrl: string;
+}
+
+export interface BankConnectionResult {
+  success: boolean;
+  error?: string;
+  authorizationUrl?: string;
+  connectionId?: string;
+}
+
+export interface ExternalAccount {
+  id: number;
+  externalAccountId: string;
+  accountName: string;
+  accountNumber: string;
+  accountType: ExternalAccountType;
+  currentBalance: number;
+  availableBalance?: number;
+  currency: string;
+  isActive: boolean;
+  lastUpdated: string;
+  linkedAccountId?: number;
+  linkedAccountName?: string;
+}
+
+export enum ExternalAccountType {
+  Current = 0,
+  Savings = 1,
+  CreditCard = 2,
+  Loan = 3,
+  Other = 4
+}
+
+export interface ExternalTransaction {
+  id: number;
+  externalTransactionId: string;
+  date: string;
+  amount: number;
+  description: string;
+  counterpart?: string;
+  reference?: string;
+  currency: string;
+  isImported: boolean;
+}
+
+export interface ImportExternalTransactionsDto {
+  externalAccountId: number;
+  accountId: number;
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface LinkAccountDto {
+  externalAccountId: number;
+  accountId: number;
+}
+
+export interface Bank {
+  id: string;
+  name: string;
+  logoUrl: string;
+}

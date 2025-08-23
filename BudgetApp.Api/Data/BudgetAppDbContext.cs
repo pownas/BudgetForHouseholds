@@ -22,6 +22,11 @@ public class BudgetAppDbContext : IdentityDbContext<User>
     public DbSet<Budget> Budgets { get; set; }
     public DbSet<Settlement> Settlements { get; set; }
     public DbSet<ImportJob> ImportJobs { get; set; }
+    
+    // PSD2/Open Banking entities
+    public DbSet<BankConnection> BankConnections { get; set; }
+    public DbSet<ExternalAccount> ExternalAccounts { get; set; }
+    public DbSet<ExternalTransaction> ExternalTransactions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +61,12 @@ public class BudgetAppDbContext : IdentityDbContext<User>
             .HasOne(t => t.Account)
             .WithMany(a => a.Transactions)
             .HasForeignKey(t => t.AccountId);
+
+        modelBuilder.Entity<Transaction>()
+            .HasOne(t => t.Owner)
+            .WithMany()
+            .HasForeignKey(t => t.OwnerId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Transaction>()
             .HasOne(t => t.Category)
@@ -162,6 +173,37 @@ public class BudgetAppDbContext : IdentityDbContext<User>
             .WithMany()
             .HasForeignKey(ij => ij.AccountId);
 
+        // Configure PSD2 relationships
+        modelBuilder.Entity<BankConnection>()
+            .HasOne(bc => bc.User)
+            .WithMany()
+            .HasForeignKey(bc => bc.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExternalAccount>()
+            .HasOne(ea => ea.BankConnection)
+            .WithMany(bc => bc.ExternalAccounts)
+            .HasForeignKey(ea => ea.BankConnectionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExternalAccount>()
+            .HasOne(ea => ea.LinkedAccount)
+            .WithMany()
+            .HasForeignKey(ea => ea.LinkedAccountId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<ExternalTransaction>()
+            .HasOne(et => et.ExternalAccount)
+            .WithMany()
+            .HasForeignKey(et => et.ExternalAccountId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<ExternalTransaction>()
+            .HasOne(et => et.ImportedTransaction)
+            .WithMany()
+            .HasForeignKey(et => et.ImportedTransactionId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Configure indexes
         modelBuilder.Entity<Transaction>()
             .HasIndex(t => t.ImportHash)
@@ -176,6 +218,23 @@ public class BudgetAppDbContext : IdentityDbContext<User>
         modelBuilder.Entity<HouseholdMember>()
             .HasIndex(hm => new { hm.HouseholdId, hm.UserId })
             .IsUnique();
+
+        // PSD2 indexes
+        modelBuilder.Entity<BankConnection>()
+            .HasIndex(bc => bc.ExternalConnectionId)
+            .IsUnique();
+
+        modelBuilder.Entity<BankConnection>()
+            .HasIndex(bc => bc.UserId);
+
+        modelBuilder.Entity<ExternalAccount>()
+            .HasIndex(ea => ea.ExternalAccountId);
+
+        modelBuilder.Entity<ExternalTransaction>()
+            .HasIndex(et => et.ExternalTransactionId);
+
+        modelBuilder.Entity<ExternalTransaction>()
+            .HasIndex(et => et.Date);
 
         // Seed default categories
         SeedDefaultCategories(modelBuilder);

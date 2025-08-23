@@ -179,3 +179,90 @@ public class CreateCategoryRuleDto
     public int Priority { get; set; } = 0;
     public int? HouseholdId { get; set; }
 }
+
+// PSD2/Open Banking DTOs
+public class BankConnectionDto
+{
+    public int Id { get; set; }
+    public string BankName { get; set; } = string.Empty;
+    public string BankId { get; set; } = string.Empty;
+    public ConnectionStatus Status { get; set; }
+    public DateTime ConsentGivenAt { get; set; }
+    public DateTime? ConsentExpiresAt { get; set; }
+    public DateTime? LastSyncAt { get; set; }
+    public string? ErrorMessage { get; set; }
+    public int AccountCount { get; set; }
+}
+
+public class CreateBankConnectionDto
+{
+    [Required]
+    public string BankId { get; set; } = string.Empty;
+    
+    [Required]
+    public string RedirectUrl { get; set; } = string.Empty;
+}
+
+public class BankConnectionResultDto
+{
+    public bool Success { get; set; }
+    public string? Error { get; set; }
+    public string? AuthorizationUrl { get; set; }
+    public string? ConnectionId { get; set; }
+}
+
+public class ExternalAccountDto
+{
+    public int Id { get; set; }
+    public string ExternalAccountId { get; set; } = string.Empty;
+    public string AccountName { get; set; } = string.Empty;
+    public string AccountNumber { get; set; } = string.Empty;
+    public ExternalAccountType AccountType { get; set; }
+    public decimal CurrentBalance { get; set; }
+    public decimal? AvailableBalance { get; set; }
+    public string Currency { get; set; } = "SEK";
+    public bool IsActive { get; set; }
+    public DateTime LastUpdated { get; set; }
+    public int? LinkedAccountId { get; set; }
+    public string? LinkedAccountName { get; set; }
+}
+
+public class ExternalTransactionDto
+{
+    public int Id { get; set; }
+    public string ExternalTransactionId { get; set; } = string.Empty;
+    public DateTime Date { get; set; }
+    public decimal Amount { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public string? Counterpart { get; set; }
+    public string? Reference { get; set; }
+    public string Currency { get; set; } = "SEK";
+    public bool IsImported { get; set; }
+}
+
+public class ImportExternalTransactionsDto
+{
+    [Required]
+    public int ExternalAccountId { get; set; }
+    
+    [Required]
+    public int AccountId { get; set; }
+    
+    public DateTime? FromDate { get; set; }
+    public DateTime? ToDate { get; set; }
+}
+
+public class SyncBankConnectionDto
+{
+    [Required]
+    public int ConnectionId { get; set; }
+}
+
+public class LinkAccountDto
+{
+    [Required]
+    public int ExternalAccountId { get; set; }
+    
+    [Required]
+    public int AccountId { get; set; }
+}
