@@ -1,0 +1,109 @@
+@page "/login"
+@using BudgetApp.Blazor.Services
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+
+<PageTitle>Logga in - Budget App</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+    <MudPaper Elevation="2" Class="pa-8">
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+            Budget App
+        </MudText>
+        <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-6">
+            Logga in på ditt konto
+        </MudText>
+
+        <EditForm Model="@loginModel" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTextField Label="E-post"
+                                  @bind-Value="loginModel.Email"
+                                  For="@(() => loginModel.Email)"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  InputType="InputType.Email" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="Lösenord"
+                                  @bind-Value="loginModel.Password"
+                                  For="@(() => loginModel.Password)"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  InputType="InputType.Password" />
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               Disabled="@isLoading"
+                               Class="mt-4">
+                        @if (isLoading)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Loggar in...</MudText>
+                        }
+                        else
+                        {
+                            <text>Logga in</text>
+                        }
+                    </MudButton>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    <MudText>
+                        Har du inget konto? 
+                        <MudLink Href="/register" Color="Color.Primary">Registrera dig här</MudLink>
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private LoginModel loginModel = new();
+    private bool isLoading = false;
+
+    private async Task OnValidSubmit()
+    {
+        isLoading = true;
+        
+        try
+        {
+            var result = await AuthService.LoginAsync(loginModel.Email, loginModel.Password);
+            
+            if (result.Success)
+            {
+                Snackbar.Add("Inloggning lyckades!", Severity.Success);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                Snackbar.Add(result.Error ?? "Inloggning misslyckades", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Ett fel uppstod: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "E-post är obligatoriskt")]
+        [EmailAddress(ErrorMessage = "Ange en giltig e-postadress")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Lösenord är obligatoriskt")]
+        [MinLength(6, ErrorMessage = "Lösenordet måste vara minst 6 tecken")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

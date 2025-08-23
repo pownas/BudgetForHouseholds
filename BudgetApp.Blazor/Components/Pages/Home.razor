@@ -1,0 +1,214 @@
+@page "/"
+@using BudgetApp.Blazor.Services
+@inject IApiService ApiService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard - Budget App</PageTitle>
+
+<MudGrid>
+    <!-- Summary Cards -->
+    <MudItem xs="12" sm="6" md="4">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <div class="d-flex align-center">
+                    <MudIcon Icon="Icons.Material.Filled.AccountBalance" Color="Color.Primary" Size="Size.Large" Class="me-3" />
+                    <div>
+                        <MudText Typo="Typo.body2" Color="Color.Primary">Total balans</MudText>
+                        <MudText Typo="Typo.h4">@FormatCurrency(totalBalance)</MudText>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="4">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <div class="d-flex align-center">
+                    <MudIcon Icon="Icons.Material.Filled.TrendingUp" Color="Color.Success" Size="Size.Large" Class="me-3" />
+                    <div>
+                        <MudText Typo="Typo.body2" Color="Color.Success">Denna månad</MudText>
+                        <MudText Typo="Typo.h4">@FormatCurrency(thisMonthTotal)</MudText>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <MudItem xs="12" sm="6" md="4">
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <div class="d-flex align-center">
+                    <MudIcon Icon="Icons.Material.Filled.Receipt" Color="Color.Secondary" Size="Size.Large" Class="me-3" />
+                    <div>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Antal transaktioner</MudText>
+                        <MudText Typo="Typo.h4">@thisMonthTransactions.Count</MudText>
+                    </div>
+                </div>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <!-- Recent Transactions -->
+    <MudItem xs="12" md="8">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Senaste transaktioner</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                @if (loading)
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+                else if (!transactions.Any())
+                {
+                    <MudText Color="Color.Default">
+                        Inga transaktioner än. 
+                        <MudButton OnClick="@(() => Navigation.NavigateTo("/import"))" Color="Color.Primary" Variant="Variant.Text">
+                            Importera CSV
+                        </MudButton>
+                    </MudText>
+                }
+                else
+                {
+                    <MudList T="string" Dense="true">
+                        @foreach (var transaction in transactions.Take(5))
+                        {
+                            <MudListItem T="string">
+                                <div class="d-flex justify-space-between align-center w-100">
+                                    <div>
+                                        <MudText Typo="Typo.body1">@transaction.Description</MudText>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">@FormatDate(transaction.Date)</MudText>
+                                    </div>
+                                    <div class="text-right">
+                                        <MudText Typo="Typo.body1" Color="@(transaction.Amount >= 0 ? Color.Success : Color.Error)">
+                                            @FormatCurrency(transaction.Amount)
+                                        </MudText>
+                                        @if (transaction.Category != null)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Text="@transaction.Category.Name" Style="@($"background-color: {transaction.Category.Color}; color: white;")" />
+                                        }
+                                    </div>
+                                </div>
+                            </MudListItem>
+                            <MudDivider />
+                        }
+                    </MudList>
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+
+    <!-- Quick Actions -->
+    <MudItem xs="12" md="4">
+        <MudCard Elevation="2">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">Snabbåtgärder</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudStack>
+                    <MudButton Variant="Variant.Outlined" 
+                               Color="Color.Primary" 
+                               FullWidth="true"
+                               StartIcon="Icons.Material.Filled.AccountBalance"
+                               OnClick="@(() => Navigation.NavigateTo("/accounts"))">
+                        Hantera konton
+                    </MudButton>
+                    
+                    <MudButton Variant="Variant.Outlined" 
+                               Color="Color.Primary" 
+                               FullWidth="true"
+                               StartIcon="Icons.Material.Filled.Receipt"
+                               OnClick="@(() => Navigation.NavigateTo("/transactions"))">
+                        Visa transaktioner
+                    </MudButton>
+                    
+                    <MudButton Variant="Variant.Outlined" 
+                               Color="Color.Primary" 
+                               FullWidth="true"
+                               StartIcon="Icons.Material.Filled.Group"
+                               OnClick="@(() => Navigation.NavigateTo("/households"))">
+                        Hantera hushåll
+                    </MudButton>
+                    
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Primary" 
+                               FullWidth="true"
+                               StartIcon="Icons.Material.Filled.CloudUpload"
+                               OnClick="@(() => Navigation.NavigateTo("/import"))">
+                        Importera CSV
+                    </MudButton>
+                </MudStack>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<Account> accounts = new();
+    private List<Transaction> transactions = new();
+    private List<Household> households = new();
+    private List<Category> categories = new();
+    private bool loading = true;
+
+    private decimal totalBalance = 0;
+    private List<Transaction> thisMonthTransactions = new();
+    private decimal thisMonthTotal = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        loading = true;
+        try
+        {
+            // Load data in parallel
+            var accountsTask = ApiService.GetAccountsAsync();
+            var transactionsTask = ApiService.GetTransactionsAsync();
+            var householdsTask = ApiService.GetHouseholdsAsync();
+            var categoriesTask = ApiService.GetCategoriesAsync();
+
+            await Task.WhenAll(accountsTask, transactionsTask, householdsTask, categoriesTask);
+
+            accounts = await accountsTask;
+            transactions = await transactionsTask;
+            households = await householdsTask;
+            categories = await categoriesTask;
+
+            // Calculate summary data
+            totalBalance = accounts.Sum(a => a.CurrentBalance);
+            var currentMonth = DateTime.Now;
+            thisMonthTransactions = transactions
+                .Where(t => t.Date.Month == currentMonth.Month && t.Date.Year == currentMonth.Year)
+                .ToList();
+            thisMonthTotal = thisMonthTransactions.Sum(t => t.Amount);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid laddning av data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string FormatCurrency(decimal amount)
+    {
+        return amount.ToString("C", new System.Globalization.CultureInfo("sv-SE"));
+    }
+
+    private string FormatDate(DateTime date)
+    {
+        return date.ToString("yyyy-MM-dd");
+    }
+}
