@@ -159,12 +159,13 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BudgetAppDbContext>();
     context.Database.EnsureCreated();
-
     // Skapa demoanvändare om den inte finns
     var userManager = scope.ServiceProvider.GetService<UserManager<User>>();
     if (userManager != null)
     {
-        var demoUser = await userManager.FindByEmailAsync("demo@demo.se");
+        var demoUserTask = userManager.FindByEmailAsync("demo@demo.se");
+        demoUserTask.Wait();
+        var demoUser = demoUserTask.Result;
         if (demoUser == null)
         {
             var newUser = new User
@@ -173,7 +174,8 @@ using (var scope = app.Services.CreateScope())
                 Email = "demo@demo.se",
                 EmailConfirmed = true
             };
-            await userManager.CreateAsync(newUser, "Demo123!");
+            var createTask = userManager.CreateAsync(newUser, "Demo123!");
+            createTask.Wait();
         }
     }
 }

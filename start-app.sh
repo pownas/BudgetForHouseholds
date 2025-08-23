@@ -1,7 +1,7 @@
 #!/bin/bash
-# Startar både backend och frontend för BudgetForHouseholds
+# Startar backend och Blazor-frontend parallellt
 
-# Starta backend (API)
+# Starta backend
 echo "Startar backend..."
 dotnet run --project BudgetApp.Api &
 BACKEND_PID=$!
@@ -9,17 +9,18 @@ BACKEND_PID=$!
 # Vänta kort så backend hinner starta
 sleep 3
 
-# Starta frontend
-cd budget-app-frontend
-echo "Startar frontend..."
-npm start &
+# Starta Blazor-frontend
+cd BudgetApp.Blazor
+echo "Startar Blazor-frontend..."
+dotnet run &
 FRONTEND_PID=$!
+cd ..
 
 # Info
 echo "Backend PID: $BACKEND_PID"
 echo "Frontend PID: $FRONTEND_PID"
-echo "Backend kör på http://localhost:5000 eller enligt launchSettings.json"
-echo "Frontend kör på http://localhost:3000"
+echo "Backend kör på http://localhost:5300"
+echo "Blazor-frontend kör på http://localhost:5000"
 
 # Vänta på att båda processer avslutas
 wait $BACKEND_PID

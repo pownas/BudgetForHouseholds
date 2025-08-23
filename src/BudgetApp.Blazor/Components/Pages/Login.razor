@@ -49,9 +49,17 @@
                         }
                         else
                         {
-                            <text>Logga in</text>
+                            Logga in
                         }
                     </MudButton>
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-center">
+                    @if (!string.IsNullOrEmpty(loginStatus))
+                    {
+                        <MudText Style=@("color:" + loginStatusColor + ";")>
+                            @loginStatus
+                        </MudText>
+                    }
                 </MudItem>
                 <MudItem xs="12" Class="d-flex justify-center">
                     <MudText>
@@ -67,28 +75,36 @@
 @code {
     private LoginModel loginModel = new();
     private bool isLoading = false;
+    private string loginStatus = string.Empty;
+    private string loginStatusColor = "red";
 
     private async Task OnValidSubmit()
     {
         isLoading = true;
-        
+        loginStatus = string.Empty;
+        loginStatusColor = "red";
         try
         {
             var result = await AuthService.LoginAsync(loginModel.Email, loginModel.Password);
-            
             if (result.Success)
             {
                 Snackbar.Add("Inloggning lyckades!", Severity.Success);
+                loginStatus = "Inloggning lyckades!";
+                loginStatusColor = "green";
                 Navigation.NavigateTo("/");
             }
             else
             {
                 Snackbar.Add(result.Error ?? "Inloggning misslyckades", Severity.Error);
+                loginStatus = result.Error ?? "Inloggning misslyckades";
+                loginStatusColor = "red";
             }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Ett fel uppstod: {ex.Message}", Severity.Error);
+            loginStatus = $"Ett fel uppstod: {ex.Message}";
+            loginStatusColor = "red";
         }
         finally
         {
