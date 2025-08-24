@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/BudgetApp.Api/BudgetApp.Api.csproj" />
+  <Project Path="src/BudgetApp.Blazor/BudgetApp.Blazor.csproj" />
+</Solution>
