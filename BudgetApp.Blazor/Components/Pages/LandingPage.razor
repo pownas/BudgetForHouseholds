@@ -1,0 +1,356 @@
+@page "/"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>BudgetForHouseholds - Hantera din hushållsbudget enkelt</PageTitle>
+
+<div class="landing-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudGrid Spacing="4" Class="min-vh-100" Style="align-items: center;">
+                <MudItem xs="12" md="6">
+                    <div class="hero-content">
+                        <MudText Typo="Typo.h2" Class="hero-title" GutterBottom="true">
+                            Hantera din hushållsbudget <span class="text-primary">enkelt</span>
+                        </MudText>
+                        <MudText Typo="Typo.h6" Class="hero-subtitle mb-4" Color="Color.Secondary">
+                            Få full koll på dina utgifter, sätt mål och dela ekonomin med familjemedlemmar. 
+                            En modern lösning för Sveriges hushåll.
+                        </MudText>
+                        
+                        <MudStack Row="true" Spacing="3" Class="mb-4">
+                            <MudButton Variant="Variant.Filled" 
+                                     Color="Color.Primary" 
+                                     Size="Size.Large"
+                                     StartIcon="Icons.Material.Filled.Login"
+                                     OnClick="@(() => Navigation.NavigateTo("/login"))">
+                                Logga in
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" 
+                                     Color="Color.Primary" 
+                                     Size="Size.Large"
+                                     StartIcon="Icons.Material.Filled.PersonAdd"
+                                     OnClick="@(() => Navigation.NavigateTo("/register"))">
+                                Skapa konto
+                            </MudButton>
+                        </MudStack>
+                    </div>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <div class="hero-image">
+                        <MudIcon Icon="Icons.Material.Filled.AccountBalance" 
+                               Color="Color.Primary" 
+                               Class="hero-icon" />
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true" Class="section-title">
+                Allt du behöver för att hantera din ekonomi
+            </MudText>
+            
+            <MudGrid Spacing="4" Class="mt-8">
+                <MudItem xs="12" md="4">
+                    <MudCard Elevation="3" Class="feature-card h-100">
+                        <MudCardContent Class="text-center">
+                            <MudIcon Icon="Icons.Material.Filled.Receipt" 
+                                   Color="Color.Primary" 
+                                   Size="Size.Large" 
+                                   Class="mb-3" />
+                            <MudText Typo="Typo.h6" GutterBottom="true">Följ dina utgifter</MudText>
+                            <MudText Color="Color.Secondary">
+                                Importera transaktioner från din bank och få automatisk kategorisering. 
+                                Se exakt vart dina pengar tar vägen.
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                
+                <MudItem xs="12" md="4">
+                    <MudCard Elevation="3" Class="feature-card h-100">
+                        <MudCardContent Class="text-center">
+                            <MudIcon Icon="Icons.Material.Filled.TrendingUp" 
+                                   Color="Color.Success" 
+                                   Size="Size.Large" 
+                                   Class="mb-3" />
+                            <MudText Typo="Typo.h6" GutterBottom="true">Sätt och följ mål</MudText>
+                            <MudText Color="Color.Secondary">
+                                Skapa budgetar för olika kategorier och få notifikationer när du 
+                                närmar dig dina gränser.
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                
+                <MudItem xs="12" md="4">
+                    <MudCard Elevation="3" Class="feature-card h-100">
+                        <MudCardContent Class="text-center">
+                            <MudIcon Icon="Icons.Material.Filled.Group" 
+                                   Color="Color.Secondary" 
+                                   Size="Size.Large" 
+                                   Class="mb-3" />
+                            <MudText Typo="Typo.h6" GutterBottom="true">Dela med familjen</MudText>
+                            <MudText Color="Color.Secondary">
+                                Hantera gemensamma utgifter och få automatiska förslag på 
+                                hur kostnaderna ska fördelas rättvist.
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section">
+        <MudContainer MaxWidth="MaxWidth.Medium">
+            <MudText Typo="Typo.h3" Align="Align.Center" GutterBottom="true" Class="section-title">
+                Enkel och transparent prissättning
+            </MudText>
+            <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Secondary" Class="mb-6">
+                Full tillgång till alla funktioner
+            </MudText>
+            
+            <MudGrid Justify="Justify.Center" Spacing="4">
+                <MudItem xs="12" sm="6" md="5">
+                    <MudCard Elevation="4" Class="pricing-card">
+                        <MudCardContent Class="text-center">
+                            <MudText Typo="Typo.h6" Class="mb-2">Månatlig betalning</MudText>
+                            <MudText Typo="Typo.h3" Color="Color.Primary" Class="mb-2">
+                                49 <span class="price-currency">kr/månad</span>
+                            </MudText>
+                            <MudText Color="Color.Secondary" Class="mb-4">
+                                Perfekt för att testa tjänsten
+                            </MudText>
+                            <MudButton Variant="Variant.Outlined" 
+                                     Color="Color.Primary" 
+                                     FullWidth="true"
+                                     OnClick="@(() => Navigation.NavigateTo("/register"))">
+                                Kom igång
+                            </MudButton>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                
+                <MudItem xs="12" sm="6" md="5">
+                    <MudCard Elevation="4" Class="pricing-card pricing-card-featured">
+                        <MudCardContent Class="text-center">
+                            <MudChip T="string" Color="Color.Success" Size="Size.Small" Class="mb-2">Rekommenderas</MudChip>
+                            <MudText Typo="Typo.h6" Class="mb-2">Årlig betalning</MudText>
+                            <MudText Typo="Typo.h3" Color="Color.Primary" Class="mb-2">
+                                499 <span class="price-currency">kr/år</span>
+                            </MudText>
+                            <MudText Color="Color.Success" Class="mb-4">
+                                Spara 89 kr per år!
+                            </MudText>
+                            <MudButton Variant="Variant.Filled" 
+                                     Color="Color.Primary" 
+                                     FullWidth="true"
+                                     OnClick="@(() => Navigation.NavigateTo("/register"))">
+                                Välj årlig plan
+                            </MudButton>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </section>
+
+    <!-- Additional Features Section -->
+    <section class="additional-features-section">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudGrid Spacing="4" Style="align-items: center;">>
+                <MudItem xs="12" md="6">
+                    <MudText Typo="Typo.h4" GutterBottom="true">
+                        Säker och användarvänlig
+                    </MudText>
+                    <MudStack Spacing="3">
+                        <div class="feature-item">
+                            <MudIcon Icon="Icons.Material.Filled.Security" Color="Color.Success" Class="me-2" />
+                            <MudText>Banknivå säkerhet med svensk datalagring</MudText>
+                        </div>
+                        <div class="feature-item">
+                            <MudIcon Icon="Icons.Material.Filled.CloudUpload" Color="Color.Primary" Class="me-2" />
+                            <MudText>Importera från alla svenska banker (CSV, PSD2)</MudText>
+                        </div>
+                        <div class="feature-item">
+                            <MudIcon Icon="Icons.Material.Filled.PhoneAndroid" Color="Color.Secondary" Class="me-2" />
+                            <MudText>Fungerar perfekt på mobil, surfplatta och dator</MudText>
+                        </div>
+                        <div class="feature-item">
+                            <MudIcon Icon="Icons.Material.Filled.Notifications" Color="Color.Warning" Class="me-2" />
+                            <MudText>Smart notifikationer när budgetar överskrids</MudText>
+                        </div>
+                    </MudStack>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <div class="features-illustration">
+                        <MudIcon Icon="Icons.Material.Filled.Smartphone" 
+                               Color="Color.Primary" 
+                               Class="illustration-icon" />
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <MudContainer MaxWidth="MaxWidth.Medium">
+            <div class="text-center">
+                <MudText Typo="Typo.h4" GutterBottom="true" Class="cta-title">
+                    Redo att ta kontroll över din ekonomi?
+                </MudText>
+                <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-4">
+                    Skapa ditt konto idag och börja hantera din hushållsbudget smart
+                </MudText>
+                <MudButton Variant="Variant.Filled" 
+                         Color="Color.Primary" 
+                         Size="Size.Large"
+                         StartIcon="Icons.Material.Filled.ArrowForward"
+                         OnClick="@(() => Navigation.NavigateTo("/register"))">
+                    Kom igång nu - gratis att testa
+                </MudButton>
+            </div>
+        </MudContainer>
+    </section>
+</div>
+
+<style>
+    .landing-page {
+        overflow-x: hidden;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 2rem 0;
+    }
+
+    .hero-title {
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-weight: 400;
+        line-height: 1.6;
+    }
+
+    .hero-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .hero-icon {
+        font-size: 15rem !important;
+        opacity: 0.8;
+    }
+
+    .features-section {
+        padding: 4rem 0;
+        background-color: #fafafa;
+    }
+
+    .section-title {
+        font-weight: 600;
+        color: #1976d2;
+    }
+
+    .feature-card {
+        transition: transform 0.2s ease-in-out;
+        border-radius: 12px;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+    }
+
+    .pricing-section {
+        padding: 4rem 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .pricing-section .section-title {
+        color: white;
+    }
+
+    .pricing-card {
+        border-radius: 16px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .pricing-card:hover {
+        transform: scale(1.02);
+    }
+
+    .pricing-card-featured {
+        border: 3px solid #4caf50;
+        position: relative;
+    }
+
+    .price-currency {
+        font-size: 1rem;
+        font-weight: 400;
+    }
+
+    .additional-features-section {
+        padding: 4rem 0;
+        background-color: white;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .features-illustration {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .illustration-icon {
+        font-size: 12rem !important;
+        opacity: 0.6;
+    }
+
+    .cta-section {
+        padding: 4rem 0;
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        color: white;
+    }
+
+    .cta-title {
+        color: white;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 960px) {
+        .hero-icon {
+            font-size: 8rem !important;
+        }
+        
+        .illustration-icon {
+            font-size: 6rem !important;
+        }
+        
+        .hero-section {
+            padding: 1rem 0;
+        }
+        
+        .features-section,
+        .pricing-section,
+        .additional-features-section,
+        .cta-section {
+            padding: 2rem 0;
+        }
+    }
+</style>
