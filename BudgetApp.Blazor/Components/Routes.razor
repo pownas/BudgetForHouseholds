@@ -6,16 +6,38 @@
         @{
             var isAuthPage = routeData.PageType == typeof(Components.Pages.Login) || 
                            routeData.PageType == typeof(Components.Pages.Register);
+            var isLandingPage = routeData.PageType == typeof(Components.Pages.LandingPage);
         }
         
-        @if (isAuthPage || AuthService.IsAuthenticated)
+        @if (isAuthPage)
         {
+            <!-- Always show auth pages -->
             <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        }
+        else if (isLandingPage && !AuthService.IsAuthenticated)
+        {
+            <!-- Show landing page for unauthenticated users -->
+            <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        }
+        else if (AuthService.IsAuthenticated)
+        {
+            <!-- Show requested page for authenticated users, but redirect / to /dashboard -->
+            @if (routeData.PageType == typeof(Components.Pages.LandingPage))
+            {
+                <RouteView RouteData="@(new RouteData(typeof(Components.Pages.Home), new Dictionary<string, object?>()))" DefaultLayout="typeof(Layout.MainLayout)" />
+            }
+            else
+            {
+                <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
+            }
             <FocusOnNavigate RouteData="routeData" Selector="h1" />
         }
         else
         {
-            <RouteView RouteData="@(new RouteData(typeof(Components.Pages.Login), new Dictionary<string, object?>()))" DefaultLayout="typeof(Layout.MainLayout)" />
+            <!-- Redirect unauthenticated users trying to access protected pages to landing page -->
+            <RouteView RouteData="@(new RouteData(typeof(Components.Pages.LandingPage), new Dictionary<string, object?>()))" DefaultLayout="typeof(Layout.MainLayout)" />
         }
     </Found>
     <NotFound>
@@ -27,14 +49,14 @@
                     <MudAlert Severity="Severity.Warning">
                         <MudText Typo="Typo.h6">Sidan hittades inte</MudText>
                         <MudText>Den begärda sidan kunde inte hittas.</MudText>
-                        <MudButton Href="/" Color="Color.Primary" Class="mt-2">Gå till startsidan</MudButton>
+                        <MudButton Href="/dashboard" Color="Color.Primary" Class="mt-2">Gå till startsidan</MudButton>
                     </MudAlert>
                 </MudContainer>
             </LayoutView>
         }
         else
         {
-            <RouteView RouteData="@(new RouteData(typeof(Components.Pages.Login), new Dictionary<string, object?>()))" DefaultLayout="typeof(Layout.MainLayout)" />
+            <RouteView RouteData="@(new RouteData(typeof(Components.Pages.LandingPage), new Dictionary<string, object?>()))" DefaultLayout="typeof(Layout.MainLayout)" />
         }
     </NotFound>
 </Router>
