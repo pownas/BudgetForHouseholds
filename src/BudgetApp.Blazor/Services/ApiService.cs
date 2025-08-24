@@ -43,10 +43,14 @@ public interface IApiService
     Task<List<BankConnection>> GetBankConnectionsAsync();
     Task<List<Bank>> GetBanksAsync();
     Task<BankConnectionResult> CreateBankConnectionAsync(CreateBankConnectionDto dto);
+    Task CompleteBankConnectionAsync(string connectionId, string authorizationCode);
+    Task DisconnectBankAsync(int connectionId);
+    Task SyncBankConnectionAsync(int connectionId);
     Task<List<ExternalAccount>> GetExternalAccountsAsync(int connectionId);
     Task<List<ExternalTransaction>> GetExternalTransactionsAsync(int externalAccountId);
     Task<ImportResult> ImportExternalTransactionsAsync(ImportExternalTransactionsDto dto);
     Task LinkAccountAsync(LinkAccountDto dto);
+    Task<ConsentCheckResult> CheckConsentExpiryAsync();
 }
 
 public class ApiService : IApiService
@@ -289,5 +293,25 @@ public class ApiService : IApiService
     public async Task LinkAccountAsync(LinkAccountDto dto)
     {
         await PostAsync<object>("psd2/link", dto);
+    }
+
+    public async Task CompleteBankConnectionAsync(string connectionId, string authorizationCode)
+    {
+        await PostAsync<object>($"psd2/connections/{connectionId}/complete", authorizationCode);
+    }
+
+    public async Task DisconnectBankAsync(int connectionId)
+    {
+        await DeleteAsync($"psd2/connections/{connectionId}");
+    }
+
+    public async Task SyncBankConnectionAsync(int connectionId)
+    {
+        await PostAsync<object>($"psd2/connections/{connectionId}/sync", new { });
+    }
+
+    public async Task<ConsentCheckResult> CheckConsentExpiryAsync()
+    {
+        return await GetAsync<ConsentCheckResult>("psd2/consent-check");
     }
 }
