@@ -9,11 +9,13 @@ public class Psd2Service : IPsd2Service
 {
     private readonly BudgetAppDbContext _context;
     private readonly ILogger<Psd2Service> _logger;
+    private readonly IPsd2EventLogService _eventLogService;
 
-    public Psd2Service(BudgetAppDbContext context, ILogger<Psd2Service> logger)
+    public Psd2Service(BudgetAppDbContext context, ILogger<Psd2Service> logger, IPsd2EventLogService eventLogService)
     {
         _context = context;
         _logger = logger;
+        _eventLogService = eventLogService;
     }
 
     public async Task<List<BankConnectionDto>> GetUserBankConnectionsAsync(string userId)
@@ -62,6 +64,11 @@ public class Psd2Service : IPsd2Service
             _context.BankConnections.Add(connection);
             await _context.SaveChangesAsync();
 
+            // Log the connection creation event
+            await _eventLogService.LogEventAsync(userId, Psd2EventTypes.ConnectionCreated, 
+                $"Bank connection created for {bankName}", connection.Id, 
+                new { BankId = dto.BankId, BankName = bankName });
+
             // In real implementation, this would be the actual authorization URL from the aggregator
             var authUrl = $"https://mock-aggregator.com/auth?connection_id={externalConnectionId}&redirect_uri={Uri.EscapeDataString(dto.RedirectUrl)}";
 
@@ -78,6 +85,12 @@ public class Psd2Service : IPsd2Service
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to create bank connection for user {UserId} with bank {BankId}", userId, dto.BankId);
+            
+            // Log the failure event
+            await _eventLogService.LogEventAsync(userId, Psd2EventTypes.ConnectionFailed, 
+                $"Failed to create bank connection for bank ID {dto.BankId}", null, 
+                new { BankId = dto.BankId }, false, ex.Message);
+                
             return new BankConnectionResultDto
             {
                 Success = false,
@@ -324,8 +337,15 @@ public class Psd2Service : IPsd2Service
 
             if (connection == null || connection.Status != ConnectionStatus.Active)
             {
+                await _eventLogService.LogEventAsync(userId, Psd2EventTypes.SyncFailed, 
+                    $"Cannot sync bank connection - connection not found or not active", connectionId, 
+                    null, false, "Connection not found or not active");
                 return false;
             }
+
+            // Log sync start
+            await _eventLogService.LogEventAsync(userId, Psd2EventTypes.SyncStarted, 
+                $"Started synchronization for {connection.BankName}", connectionId);
 
             // In real implementation, this would fetch fresh data from the aggregator
             await CreateMockTransactionsForConnection(connection);
@@ -335,12 +355,22 @@ public class Psd2Service : IPsd2Service
 
             await _context.SaveChangesAsync();
 
+            // Log successful sync
+            await _eventLogService.LogEventAsync(userId, Psd2EventTypes.SyncCompleted, 
+                $"Successfully synchronized {connection.BankName}", connectionId,
+                new { SyncTimestamp = connection.LastSyncAt });
+
             _logger.LogInformation("Synced bank connection {ConnectionId} for user {UserId}", connectionId, userId);
             return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to sync bank connection {ConnectionId} for user {UserId}", connectionId, userId);
+            
+            // Log sync failure
+            await _eventLogService.LogEventAsync(userId, Psd2EventTypes.SyncFailed, 
+                $"Failed to synchronize bank connection", connectionId, null, false, ex.Message);
+                
             return false;
         }
     }

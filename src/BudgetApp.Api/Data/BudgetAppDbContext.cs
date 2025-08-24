@@ -28,6 +28,7 @@ public class BudgetAppDbContext : IdentityDbContext<User>
     public DbSet<BankConnection> BankConnections { get; set; }
     public DbSet<ExternalAccount> ExternalAccounts { get; set; }
     public DbSet<ExternalTransaction> ExternalTransactions { get; set; }
+    public DbSet<Psd2EventLog> Psd2EventLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -243,6 +244,25 @@ public class BudgetAppDbContext : IdentityDbContext<User>
 
         modelBuilder.Entity<ExternalTransaction>()
             .HasIndex(et => et.Date);
+
+        // PSD2 Event Log relationships
+        modelBuilder.Entity<Psd2EventLog>()
+            .HasOne(el => el.User)
+            .WithMany()
+            .HasForeignKey(el => el.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Psd2EventLog>()
+            .HasOne(el => el.BankConnection)
+            .WithMany()
+            .HasForeignKey(el => el.BankConnectionId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Psd2EventLog>()
+            .HasIndex(el => el.Timestamp);
+
+        modelBuilder.Entity<Psd2EventLog>()
+            .HasIndex(el => el.EventType);
 
         // Seed default categories
         SeedDefaultCategories(modelBuilder);
