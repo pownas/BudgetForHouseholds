@@ -48,3 +48,14 @@ public interface IPsd2Service
     Task<bool> LinkAccountAsync(LinkAccountDto dto, string userId);
     Task<bool> CheckConsentExpiryAsync(string userId);
 }
+
+public interface IPsd2EventLogService
+{
+    Task LogEventAsync(string userId, string eventType, string description, int? bankConnectionId = null, 
+        object? eventData = null, bool isSuccess = true, string? errorMessage = null, 
+        string? ipAddress = null, string? userAgent = null);
+    Task<List<Psd2EventLogDto>> GetEventLogsAsync(string userId, int? bankConnectionId = null, 
+        DateTime? fromDate = null, DateTime? toDate = null, int page = 1, int pageSize = 50);
+    Task<List<Psd2EventLogDto>> GetSystemEventLogsAsync(DateTime? fromDate = null, DateTime? toDate = null, 
+        string? eventType = null, int page = 1, int pageSize = 50);
+}

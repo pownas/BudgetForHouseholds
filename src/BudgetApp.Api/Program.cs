@@ -59,7 +59,11 @@ builder.Services.AddScoped<ICsvImportService, CsvImportService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IHouseholdService, HouseholdService>();
 builder.Services.AddScoped<IPsd2Service, Psd2Service>();
+builder.Services.AddScoped<IPsd2EventLogService, Psd2EventLogService>();
 builder.Services.AddScoped<IReceiptAttachmentService, ReceiptAttachmentService>();
+
+// Background Services
+builder.Services.AddHostedService<BudgetApp.Api.BackgroundServices.Psd2SyncBackgroundService>();
 
 // CORS
 builder.Services.AddCors(options =>

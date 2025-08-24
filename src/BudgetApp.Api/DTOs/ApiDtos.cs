@@ -266,3 +266,17 @@ public class LinkAccountDto
     [Required]
     public int AccountId { get; set; }
 }
+
+// PSD2 Event Log DTOs
+public class Psd2EventLogDto
+{
+    public int Id { get; set; }
+    public string EventType { get; set; } = string.Empty;
+    public string EventDescription { get; set; } = string.Empty;
+    public string? EventData { get; set; }
+    public DateTime Timestamp { get; set; }
+    public bool IsSuccess { get; set; }
+    public string? ErrorMessage { get; set; }
+    public int? BankConnectionId { get; set; }
+    public string? BankName { get; set; }
+}

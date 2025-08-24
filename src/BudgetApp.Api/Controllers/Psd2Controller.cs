@@ -12,11 +12,13 @@ namespace BudgetApp.Api.Controllers;
 public class Psd2Controller : ControllerBase
 {
     private readonly IPsd2Service _psd2Service;
+    private readonly IPsd2EventLogService _eventLogService;
     private readonly ILogger<Psd2Controller> _logger;
 
-    public Psd2Controller(IPsd2Service psd2Service, ILogger<Psd2Controller> logger)
+    public Psd2Controller(IPsd2Service psd2Service, IPsd2EventLogService eventLogService, ILogger<Psd2Controller> logger)
     {
         _psd2Service = psd2Service;
+        _eventLogService = eventLogService;
         _logger = logger;
     }
 
@@ -155,5 +157,18 @@ public class Psd2Controller : ControllerBase
         };
 
         return Ok(banks);
+    }
+
+    [HttpGet("event-logs")]
+    public async Task<ActionResult<List<Psd2EventLogDto>>> GetEventLogs(
+        [FromQuery] int? bankConnectionId = null,
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
+        var eventLogs = await _eventLogService.GetEventLogsAsync(userId, bankConnectionId, fromDate, toDate, page, pageSize);
+        return Ok(eventLogs);
     }
 }
