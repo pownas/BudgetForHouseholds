@@ -1,22 +1,409 @@
 @page "/bank-connections"
 @rendermode InteractiveServer
+@using BudgetApp.Blazor.Models
+@using BudgetApp.Blazor.Services
+@inject IApiService ApiService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
 
 <PageTitle>Bankförbindelser - Budget App</PageTitle>
 
-<MudContainer>
-    <MudText Typo="Typo.h4" Class="mb-4">Bankförbindelser</MudText>
+<MudGrid>
+    <MudItem xs="12">
+        <div class="d-flex justify-space-between align-center mb-4">
+            <MudText Typo="Typo.h4">Bankförbindelser</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="Icons.Material.Filled.Add" OnClick="OpenBankSelectionDialog">
+                Anslut bank
+            </MudButton>
+        </div>
+    </MudItem>
+
+    @if (isLoading)
+    {
+        <MudItem xs="12">
+            <MudProgressLinear Indeterminate="true" />
+            <MudText Class="mt-2">Laddar bankförbindelser...</MudText>
+        </MudItem>
+    }
+    else if (bankConnections.Count == 0)
+    {
+        <MudItem xs="12">
+            <MudAlert Severity="Severity.Info">
+                <MudText Typo="Typo.h6">Inga bankförbindelser</MudText>
+                <MudText>Anslut din bank för att automatiskt importera transaktioner och kontosaldon.</MudText>
+                <MudButton Variant="Variant.Filled"
+                          Color="Color.Primary"
+                          StartIcon="Icons.Material.Filled.Add"
+                          OnClick="OpenBankSelectionDialog"
+                          Class="mt-3">
+                    Anslut din första bank
+                </MudButton>
+            </MudAlert>
+        </MudItem>
+    }
+    else
+    {
+        @foreach (var connection in bankConnections)
+        {
+            <MudItem xs="12" sm="6" md="4">
+                <MudCard Elevation="2">
+                    <MudCardContent>
+                        <div class="d-flex justify-space-between align-center mb-2">
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Color="Color.Primary" Class="mr-2" />
+                                <MudText Typo="Typo.h6">@connection.BankName</MudText>
+                            </div>
+                            <MudChip T="string" Color="@GetStatusColor(connection.Status)" 
+                                    Size="Size.Small"
+                                    Text="@GetStatusText(connection.Status)" />
+                        </div>
+
+                        <MudText Typo="Typo.body2" Class="mb-2">
+                            @connection.AccountCount konton anslutna
+                        </MudText>
+
+                        @if (connection.LastSyncAt.HasValue)
+                        {
+                            <MudText Typo="Typo.body2" Class="mb-2">
+                                Senast synkad: @connection.LastSyncAt.Value.ToString("yyyy-MM-dd HH:mm")
+                            </MudText>
+                        }
+
+                        @if (connection.ConsentExpiresAt.HasValue)
+                        {
+                            var daysLeft = (connection.ConsentExpiresAt.Value - DateTime.UtcNow).Days;
+                            var expiryColor = daysLeft <= 7 ? Color.Warning : Color.Default;
+                            <MudText Typo="Typo.body2" Class="mb-2" Color="@expiryColor">
+                                Medgivande upphör: @connection.ConsentExpiresAt.Value.ToString("yyyy-MM-dd")
+                                @if (daysLeft <= 7 && daysLeft > 0)
+                                {
+                                    <text> (@daysLeft dagar kvar)</text>
+                                }
+                                else if (daysLeft <= 0)
+                                {
+                                    <text> (Upphört)</text>
+                                }
+                            </MudText>
+                        }
+
+                        @if (!string.IsNullOrEmpty(connection.ErrorMessage))
+                        {
+                            <MudAlert Severity="Severity.Error" Class="mb-2">
+                                @connection.ErrorMessage
+                            </MudAlert>
+                        }
+
+                        <div class="d-flex justify-space-between mt-3">
+                            <div class="d-flex">
+                                <MudTooltip Text="Visa konton">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Link"
+                                                  Size="Size.Small"
+                                                  Color="Color.Primary"
+                                                  Disabled="@(connection.Status != ConnectionStatus.Active)"
+                                                  OnClick="@(() => ShowExternalAccounts(connection))" />
+                                </MudTooltip>
+                                <MudTooltip Text="Synkronisera">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Sync"
+                                                  Size="Size.Small"
+                                                  Color="Color.Primary"
+                                                  Disabled="@(connection.Status != ConnectionStatus.Active || isSyncing)"
+                                                  OnClick="@(() => SyncConnection(connection.Id))" />
+                                </MudTooltip>
+                            </div>
+                            <MudTooltip Text="Koppla från">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                              Size="Size.Small"
+                                              Color="Color.Error"
+                                              OnClick="@(() => DisconnectBank(connection.Id))" />
+                            </MudTooltip>
+                        </div>
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    }
+</MudGrid>
+
+<!-- Bank Selection Dialog -->
+<MudDialog @bind-Visible="showBankDialog">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Välj bank att ansluta</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (isLoadingBanks)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate />
+            <MudText Class="mt-2">Laddar tillgängliga banker...</MudText>
+        }
+        else
+        {
+            <MudList T="object">
+                @foreach (var bank in availableBanks)
+                {
+                    <MudListItem T="object" OnClick="@(() => ConnectBank(bank.Id))">
+                        <div class="d-flex align-center">
+                            <MudAvatar Class="mr-3">
+                                <MudIcon Icon="@Icons.Material.Filled.AccountBalance" />
+                            </MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.body1">@bank.Name</MudText>
+                                <MudText Typo="Typo.body2">Anslut säkert via Open Banking</MudText>
+                            </div>
+                        </div>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseBankSelectionDialog">Avbryt</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- External Accounts Dialog -->
+<MudDialog @bind-Visible="showAccountsDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@selectedConnection?.BankName - Konton</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (isLoadingAccounts)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate />
+            <MudText Class="mt-2">Laddar konton...</MudText>
+        }
+        else
+        {
+            <MudList T="object">
+                @foreach (var account in externalAccounts)
+                {
+                    <MudListItem T="object">
+                        <div class="d-flex justify-space-between align-center" style="width: 100%">
+                            <div class="d-flex align-center">
+                                <MudAvatar Class="mr-3">
+                                    <MudIcon Icon="@Icons.Material.Filled.AccountBalance" />
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.body1">@account.AccountName</MudText>
+                                    <MudText Typo="Typo.body2">
+                                        @account.AccountNumber • @account.Currency @account.CurrentBalance.ToString("N2")
+                                    </MudText>
+                                    @if (!string.IsNullOrEmpty(account.LinkedAccountName))
+                                    {
+                                        <MudText Typo="Typo.body2" Color="Color.Primary">
+                                            Länkat till: @account.LinkedAccountName
+                                        </MudText>
+                                    }
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                @if (account.LinkedAccountId == null)
+                                {
+                                    <MudButton Size="Size.Small" 
+                                              StartIcon="@Icons.Material.Filled.Link"
+                                              Color="Color.Primary"
+                                              Class="mr-2">
+                                        Länka konto
+                                    </MudButton>
+                                }
+                                <MudButton Size="Size.Small" 
+                                          StartIcon="@Icons.Material.Filled.Download"
+                                          Color="Color.Secondary">
+                                    Importera transaktioner
+                                </MudButton>
+                            </div>
+                        </div>
+                    </MudListItem>
+                }
+            </MudList>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseAccountsDialog">Stäng</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<BankConnection> bankConnections = new();
+    private List<Bank> availableBanks = new();
+    private List<ExternalAccount> externalAccounts = new();
+    private BankConnection? selectedConnection;
     
-    <MudAlert Severity="Severity.Info">
-        <MudText Typo="Typo.h6">PSD2/Open Banking</MudText>
-        <MudText>Denna sida kommer att hantera anslutningar till banker via PSD2/Open Banking.</MudText>
-        <MudText Class="mt-2"><strong>Funktioner som kommer att implementeras:</strong></MudText>
-        <ul>
-            <li>Lista tillgängliga banker</li>
-            <li>Upprätta säkra anslutningar</li>
-            <li>Hantera medgivanden</li>
-            <li>Synkronisera konton automatiskt</li>
-            <li>Importera transaktioner</li>
-            <li>Övervaka anslutningsstatus</li>
-        </ul>
-    </MudAlert>
-</MudContainer>
+    private bool isLoading = true;
+    private bool isLoadingBanks = false;
+    private bool isLoadingAccounts = false;
+    private bool isSyncing = false;
+    private bool showBankDialog = false;
+    private bool showAccountsDialog = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBankConnections();
+    }
+
+    private async Task LoadBankConnections()
+    {
+        try
+        {
+            isLoading = true;
+            bankConnections = await ApiService.GetBankConnectionsAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid laddning av bankförbindelser: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task OpenBankSelectionDialog()
+    {
+        try
+        {
+            isLoadingBanks = true;
+            showBankDialog = true;
+            availableBanks = await ApiService.GetBanksAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid laddning av banker: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoadingBanks = false;
+        }
+    }
+
+    private void CloseBankSelectionDialog()
+    {
+        showBankDialog = false;
+    }
+
+    private async Task ConnectBank(string bankId)
+    {
+        try
+        {
+            var dto = new CreateBankConnectionDto
+            {
+                BankId = bankId,
+                RedirectUrl = $"{NavigationManager.BaseUri}bank-connections/callback"
+            };
+
+            var result = await ApiService.CreateBankConnectionAsync(dto);
+            
+            if (result.Success && !string.IsNullOrEmpty(result.AuthorizationUrl))
+            {
+                // In a real implementation, we would redirect to the bank's authorization page
+                // For demo purposes, we'll simulate a successful connection
+                Snackbar.Add("Omdirigerar till bank för autentisering...", Severity.Info);
+                
+                // Simulate completion after a delay
+                await Task.Delay(2000);
+                if (!string.IsNullOrEmpty(result.ConnectionId))
+                {
+                    await ApiService.CompleteBankConnectionAsync(result.ConnectionId, "demo_auth_code");
+                    Snackbar.Add("Bankanslutning genomförd!", Severity.Success);
+                    await LoadBankConnections();
+                }
+            }
+            else
+            {
+                Snackbar.Add(result.Error ?? "Fel vid skapande av bankanslutning", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid anslutning till bank: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            showBankDialog = false;
+        }
+    }
+
+    private async Task SyncConnection(int connectionId)
+    {
+        try
+        {
+            isSyncing = true;
+            await ApiService.SyncBankConnectionAsync(connectionId);
+            Snackbar.Add("Synkronisering genomförd!", Severity.Success);
+            await LoadBankConnections();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid synkronisering: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSyncing = false;
+        }
+    }
+
+    private async Task DisconnectBank(int connectionId)
+    {
+        try
+        {
+            await ApiService.DisconnectBankAsync(connectionId);
+            Snackbar.Add("Bank frånkopplad", Severity.Success);
+            await LoadBankConnections();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid frånkoppling: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ShowExternalAccounts(BankConnection connection)
+    {
+        try
+        {
+            selectedConnection = connection;
+            isLoadingAccounts = true;
+            showAccountsDialog = true;
+            externalAccounts = await ApiService.GetExternalAccountsAsync(connection.Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fel vid laddning av konton: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoadingAccounts = false;
+        }
+    }
+
+    private void CloseAccountsDialog()
+    {
+        showAccountsDialog = false;
+        selectedConnection = null;
+        externalAccounts.Clear();
+    }
+
+    private Color GetStatusColor(ConnectionStatus status)
+    {
+        return status switch
+        {
+            ConnectionStatus.Active => Color.Success,
+            ConnectionStatus.Pending => Color.Warning,
+            ConnectionStatus.ConsentExpired => Color.Error,
+            ConnectionStatus.Error => Color.Error,
+            ConnectionStatus.Disconnected => Color.Default,
+            _ => Color.Default
+        };
+    }
+
+    private string GetStatusText(ConnectionStatus status)
+    {
+        return status switch
+        {
+            ConnectionStatus.Active => "Aktiv",
+            ConnectionStatus.Pending => "Väntar",
+            ConnectionStatus.ConsentExpired => "Medgivande upphört",
+            ConnectionStatus.Error => "Fel",
+            ConnectionStatus.Disconnected => "Frånkopplad",
+            _ => "Okänd"
+        };
+    }
+}

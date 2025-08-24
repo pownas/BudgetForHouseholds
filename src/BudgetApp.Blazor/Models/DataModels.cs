@@ -301,3 +301,8 @@ public class Bank
     public string Name { get; set; } = string.Empty;
     public string LogoUrl { get; set; } = string.Empty;
 }
+
+public class ConsentCheckResult
+{
+    public bool HasExpiringConsents { get; set; }
+}
