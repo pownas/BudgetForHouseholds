@@ -28,6 +28,11 @@ yarn-error.log*
 *.sqlite
 *.sqlite3
 
+# Playwright Test results and reports
+test-results/
+playwright-report/
+playwright/.cache/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

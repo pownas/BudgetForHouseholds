@@ -1,4 +1,14 @@
 {
+  "name": "budget-for-households",
+  "version": "1.0.0",
+  "description": "En privatekonomi app för budget och kostnadssplit mellan sambos",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:smoke": "playwright test tests/dashboard-smoke.spec.ts",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug"
+  },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -6,5 +16,8 @@
     "axios": "^1.11.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
   }
 }
