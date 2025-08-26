@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BudgetApp.Api\BudgetApp.Api.csproj" />
     <ProjectReference Include="..\BudgetApp.Blazor\BudgetApp.Blazor.csproj" />
   </ItemGroup>
 

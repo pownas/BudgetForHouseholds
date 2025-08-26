@@ -2,7 +2,6 @@ using BudgetApp.Blazor.Components;
 using BudgetApp.Blazor.Models;
 using BudgetApp.Blazor.Services;
 using MudBlazor.Services;
-using BudgetApp.Aspire.ServiceDefaults; // added
 
 var builder = WebApplication.CreateBuilder(args);
 

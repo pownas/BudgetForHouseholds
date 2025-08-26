@@ -6,7 +6,6 @@ using System.Text;
 using BudgetApp.Api.Data;
 using BudgetApp.Api.Models;
 using BudgetApp.Api.Services;
-using BudgetApp.Aspire.ServiceDefaults; // added
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -112,6 +111,8 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.MapDefaultEndpoints();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -150,6 +151,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHealthChecks("/health");
 
 app.Run();
