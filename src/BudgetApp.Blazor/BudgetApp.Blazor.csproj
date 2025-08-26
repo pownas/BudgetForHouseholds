@@ -10,4 +10,8 @@
     <PackageReference Include="MudBlazor" Version="8.11.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\\BudgetApp.Aspire.ServiceDefaults\\ServiceDefaults.csproj" />
+  </ItemGroup>
+
 </Project>

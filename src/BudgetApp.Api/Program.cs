@@ -6,14 +6,20 @@ using System.Text;
 using BudgetApp.Api.Data;
 using BudgetApp.Api.Models;
 using BudgetApp.Api.Services;
+using BudgetApp.Aspire.ServiceDefaults; // added
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Shared defaults (health checks, telemetry, resilience)
+builder.AddServiceDefaults();
+
 // Add services to the container.
-// Database
+// Database (will be overridden by Aspire connection string named "budgetdb" if present)
+var connectionString = builder.Configuration.GetConnectionString("budgetdb")
+                       ?? builder.Configuration.GetConnectionString("DefaultConnection")
+                       ?? "Data Source=budgetapp.db";
 builder.Services.AddDbContext<BudgetAppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") 
-        ?? "Data Source=budgetapp.db"));
+    options.UseSqlite(connectionString));
 
 // Identity
 builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -92,7 +98,6 @@ builder.Services.AddSwaggerGen(c =>
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
-
     c.AddSecurityRequirement(new()
     {
         {
@@ -145,5 +150,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.AppHost">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BudgetApp.Api\BudgetApp.Api.csproj" />
+    <ProjectReference Include="..\BudgetApp.Blazor\BudgetApp.Blazor.csproj" />
+  </ItemGroup>
+</Project>

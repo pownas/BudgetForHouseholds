@@ -2,8 +2,12 @@ using BudgetApp.Blazor.Components;
 using BudgetApp.Blazor.Models;
 using BudgetApp.Blazor.Services;
 using MudBlazor.Services;
+using BudgetApp.Aspire.ServiceDefaults; // added
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Shared defaults
+builder.AddServiceDefaults();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -15,7 +19,7 @@ builder.Services.AddMudServices();
 // Add HttpClient for API calls
 builder.Services.AddHttpClient();
 
-// Add API service configuration
+// Add API service configuration (Aspire can override via service discovery later)
 builder.Services.Configure<ApiConfiguration>(options =>
 {
     options.BaseUrl = builder.Configuration.GetValue<string>("ApiSettings:BaseUrl") ?? "http://localhost:5300/api";
@@ -31,7 +35,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -42,5 +45,7 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.MapHealthChecks("/health");
 
 app.Run();
