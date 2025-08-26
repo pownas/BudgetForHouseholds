@@ -106,6 +106,19 @@ public static class Extensions
         return builder;
     }
 
+    /// <summary>
+    /// Configures the application to map default health check endpoints for readiness and liveness checks in
+    /// development environments.
+    /// </summary>
+    /// <remarks>This method maps two health check endpoints when the application is running in a development
+    /// environment: <list type="bullet"> <item> <description><c>/health</c>: All health checks must pass for the
+    /// application to be considered ready to accept traffic.</description> </item> <item>
+    /// <description><c>/health/live</c>: Only health checks tagged with the "live" tag must pass for the application to
+    /// be considered alive.</description> </item> </list> These endpoints are not mapped in non-development
+    /// environments due to potential security implications. For more information, see <see
+    /// href="https://aka.ms/dotnet/aspire/healthchecks">Health Checks in ASP.NET Core</see>.</remarks>
+    /// <param name="app">The <see cref="WebApplication"/> instance to configure.</param>
+    /// <returns>The configured <see cref="WebApplication"/> instance.</returns>
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         // Adding health checks endpoints to applications in non-development environments has security implications.
