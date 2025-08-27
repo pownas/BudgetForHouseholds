@@ -1,12 +1,14 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using BudgetApp.Api.Data;
 using BudgetApp.Api.Models;
 using BudgetApp.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Diagnostics; // added for logging
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -107,36 +109,42 @@ builder.Services.AddHostedService<BudgetApp.Api.BackgroundServices.Psd2SyncBackg
 // CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
+    //options.AddPolicy("AllowReactApp", policy =>
+    //{
+    //    policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+    //          .AllowAnyHeader()
+    //          .AllowAnyMethod()
+    //          .AllowCredentials();
+    //});
 });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "Budget App API", Version = "v1" });
-    
+    c.SwaggerDoc("v1", new OpenApiInfo { 
+        Title = "Budget App API", 
+        Version = "3.1.0"
+    });
+
+    c.DocInclusionPredicate((docName, description) => true);
+    c.CustomSchemaIds(type => type.FullName);
+
     // Add JWT authentication to Swagger
-    c.AddSecurityDefinition("Bearer", new()
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token.",
         Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
     c.AddSecurityRequirement(new()
     {
         {
-            new()
+            new OpenApiSecurityScheme()
             {
-                Reference = new() { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             Array.Empty<string>()
         }
@@ -151,7 +159,8 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    //app.UseSwaggerUI();
+    app.UseSwaggerUI(c => { c.SwaggerEndpoint("./v1/openapi.json", "Budget App API"); });
 }
 
 // Ensure database is created
@@ -179,7 +188,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowReactApp");
+//app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
