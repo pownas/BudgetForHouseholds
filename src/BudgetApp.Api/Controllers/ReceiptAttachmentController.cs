@@ -4,6 +4,7 @@ using BudgetApp.Api.Models;
 using BudgetApp.Api.Services;
 using System.Threading.Tasks;
 using System.IO;
+using BudgetApp.Api.DTOs; // added
 
 namespace BudgetApp.Api.Controllers
 {
@@ -20,12 +21,13 @@ namespace BudgetApp.Api.Controllers
 
         [HttpPost("upload")]
         [Authorize]
-        public async Task<IActionResult> UploadReceipt([FromForm] int transactionId, [FromForm] IFormFile file)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadReceipt([FromForm] ReceiptUploadRequest request)
         {
-            if (file == null || file.Length == 0)
+            if (request.File == null || request.File.Length == 0)
                 return BadRequest("Ingen fil vald.");
 
-            var result = await _service.UploadReceiptAsync(transactionId, file);
+            var result = await _service.UploadReceiptAsync(request.TransactionId, request.File);
             if (result == null)
                 return BadRequest("Kunde inte ladda upp kvitto.");
 
