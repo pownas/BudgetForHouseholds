@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="src/BudgetApp.Api/BudgetApp.Api.csproj" />
+  <Project Path="src/BudgetApp.AppHost/BudgetApp.AppHost.csproj" Id="fdd53c83-7108-4f51-b687-9e95f2606111" />
   <Project Path="src/BudgetApp.Blazor/BudgetApp.Blazor.csproj" />
+  <Project Path="src/BudgetApp.ServiceDefaults/BudgetApp.ServiceDefaults.csproj" />
 </Solution>

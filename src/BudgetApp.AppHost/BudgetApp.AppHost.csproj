@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.1" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>0c2917c5-377a-4bc4-af1e-81352681ff78</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.1" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="9.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BudgetApp.Api\BudgetApp.Api.csproj" />
+    <ProjectReference Include="..\BudgetApp.Blazor\BudgetApp.Blazor.csproj" />
+  </ItemGroup>
+
+</Project>
