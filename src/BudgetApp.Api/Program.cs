@@ -6,6 +6,7 @@ using System.Text;
 using BudgetApp.Api.Data;
 using BudgetApp.Api.Models;
 using BudgetApp.Api.Services;
+using System.Diagnostics; // added for logging
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,9 +15,42 @@ builder.AddServiceDefaults();
 
 // Add services to the container.
 // Database (will be overridden by Aspire connection string named "budgetdb" if present)
-var connectionString = builder.Configuration.GetConnectionString("budgetdb")
+var rawConnectionString = builder.Configuration.GetConnectionString("budgetdb")
                        ?? builder.Configuration.GetConnectionString("DefaultConnection")
                        ?? "Data Source=budgetapp.db";
+
+// Normalize and ensure directory exists for SQLite file
+string connectionString = rawConnectionString;
+try
+{
+    // Find data source part
+    var parts = rawConnectionString.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+    var dsIndex = parts.FindIndex(p => p.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase) || p.StartsWith("DataSource=", StringComparison.OrdinalIgnoreCase));
+    if (dsIndex >= 0)
+    {
+        var kv = parts[dsIndex].Split('=', 2);
+        if (kv.Length == 2)
+        {
+            var pathPart = kv[1].Trim();
+            // If the provided path is a directory (ends with path separator) or has no extension, still treat as file name unless directory exists already
+            // Make absolute if relative
+            string resolvedPath = Path.IsPathRooted(pathPart) ? pathPart : Path.Combine(AppContext.BaseDirectory, pathPart);
+            var dir = Path.GetDirectoryName(resolvedPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            // Rebuild parts with absolute path
+            parts[dsIndex] = $"Data Source={resolvedPath}";
+            connectionString = string.Join(';', parts);
+        }
+    }
+}
+catch (Exception ex)
+{
+    Debug.WriteLine($"[Startup] Failed to normalize SQLite path: {ex.Message}");
+}
+
 builder.Services.AddDbContext<BudgetAppDbContext>(options =>
     options.UseSqlite(connectionString));
 
