@@ -124,7 +124,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { 
         Title = "Budget App API", 
-        Version = "3.1.0"
+        Version = "v1"
     });
 
     c.DocInclusionPredicate((docName, description) => true);
