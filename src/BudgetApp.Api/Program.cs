@@ -121,7 +121,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "Budget App API", Version = "v1" });
-    
+
     // Add JWT authentication to Swagger
     c.AddSecurityDefinition("Bearer", new()
     {
@@ -141,6 +141,9 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    // Enable file upload support in Swagger
+    c.OperationFilter<BudgetApp.Api.DTOs.AddFileUploadOperationFilter>();
 });
 
 var app = builder.Build();

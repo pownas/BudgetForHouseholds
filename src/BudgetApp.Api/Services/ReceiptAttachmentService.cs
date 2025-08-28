@@ -38,7 +38,8 @@ namespace BudgetApp.Api.Services
                 ContentType = file.ContentType,
                 BlobPath = filePath,
                 UploadedAt = DateTime.UtcNow,
-                TransactionId = transactionId
+                TransactionId = transactionId,
+                Transaction = transaction
             };
             _db.ReceiptAttachments.Add(attachment);
             await _db.SaveChangesAsync();

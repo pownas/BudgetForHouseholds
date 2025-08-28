@@ -5,11 +5,11 @@ namespace BudgetApp.Api.Models
     public class ReceiptAttachment
     {
         public int Id { get; set; }
-        public string FileName { get; set; }
-        public string ContentType { get; set; }
-        public string BlobPath { get; set; } // Path in object storage
+    public required string FileName { get; set; }
+    public required string ContentType { get; set; }
+    public required string BlobPath { get; set; } // Path in object storage
         public DateTime UploadedAt { get; set; }
         public int TransactionId { get; set; }
-        public Transaction Transaction { get; set; }
+    public required Transaction Transaction { get; set; }
     }
 }
