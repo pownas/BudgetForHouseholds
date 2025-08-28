@@ -1,3 +1,80 @@
+## Installation och setup
+
+1. Installera .NET 8 SDK (eller senare):
+   https://dotnet.microsoft.com/download
+
+2. Klona repot:
+   ```bash
+   git clone https://github.com/pownas/BudgetForHouseholds.git
+   cd BudgetForHouseholds
+   ```
+
+3. (Valfritt) Installera Aspire workload:
+   ```bash
+   dotnet workload install aspire
+   ```
+
+4. Bygg och starta AppHost:
+   ```bash
+   dotnet build
+   dotnet run --project src/BudgetApp.AppHost
+   ```
+
+5. Öppna Aspire dashboard i webbläsaren:
+   http://localhost:18888
+
+6. Starta Blazor-appen via dashboarden ("BudgetApp.Blazor").
+
+SQLite används som databas och skapas automatiskt vid första körning.
+Aspire dashboard:
+- När AppHost körs startas Aspire dashboard automatiskt.
+- Dashboarden är normalt tillgänglig på http://localhost:18888
+- Blazor-appen och API-tjänster nås via dashboardens tjänsteöversikt.
+
+Exempel:
+1. Starta AppHost:
+   ```bash
+   dotnet run --project src/BudgetApp.AppHost
+   ```
+2. Öppna Aspire dashboard i webbläsaren:
+   http://localhost:18888
+3. Klicka på "BudgetApp.Blazor" för att öppna Blazor-appen.
+Förutsättningar:
+- .NET 8 SDK eller senare
+- SQLite (för lokal databas)
+- Aspire (AppHost) för lokal orkestrering och dashboard
+
+Bygg och kör:
+1. Klona repot
+2. Bygg och starta med .NET:
+   ```bash
+   dotnet build
+   dotnet run --project src/BudgetApp.AppHost
+   ```
+3. Blazor-appen körs via AppHost och är tillgänglig via dashboarden.
+
+Node.js, npm och React behövs inte längre. All frontend är nu Blazor WebAssembly.
+BudgetForHouseholds
+===================
+
+Swedish household budget management app. Mobile-first, import transactions, categorize, split costs, manage household budgets.
+
+Frontend: Blazor WebAssembly (with mobile-first design)
+Backend: REST API (.NET Core)
+Database: SQLite
+Infrastructure: Aspire dashboard and AppHost for orchestration and local development
+
+See Kravspecifikation.md for requirements (Swedish).
+
+Aspire integration:
+- The solution includes an Aspire AppHost for local orchestration, service discovery, and dashboarding.
+- To run locally, use the AppHost project for a unified developer experience.
+
+Blazor app:
+- The Blazor frontend replaces the previous React-based implementation.
+- All UI and client logic is now in `src/BudgetApp.Blazor/`.
+
+React frontend info has been removed. For legacy code, see previous commits or branches.
 # BudgetForHouseholds - MVP
 
 En privatekonomi app för budget och kostnadssplit mellan sambos. Denna MVP implementerar grundfunktionaliteten enligt kravspecifikationen.
