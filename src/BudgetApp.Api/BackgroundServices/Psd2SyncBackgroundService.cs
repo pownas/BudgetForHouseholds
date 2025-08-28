@@ -38,9 +38,10 @@ public class Psd2SyncBackgroundService : BackgroundService
                 var eventLogService = scope.ServiceProvider.GetRequiredService<IPsd2EventLogService>();
 
                 // Get all active connections that need syncing
+                var syncThreshold = DateTime.UtcNow.Subtract(_syncInterval);
                 var connectionsToSync = await context.BankConnections
                     .Where(bc => bc.Status == ConnectionStatus.Active && 
-                                 (bc.LastSyncAt == null || bc.LastSyncAt < DateTime.UtcNow.Subtract(_syncInterval)))
+                                 (bc.LastSyncAt == null || bc.LastSyncAt < syncThreshold))
                     .ToListAsync(stoppingToken);
 
                 _logger.LogInformation("Found {Count} bank connections to sync", connectionsToSync.Count);
