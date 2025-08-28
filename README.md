@@ -1,3 +1,12 @@
+## Starta Aspire AppHost
+
+För att köra hela systemet lokalt med dashboard:
+
+```bash
+dotnet run --project src/BudgetApp.AppHost
+```
+
+Dashboarden öppnas på http://localhost:18888 där du kan starta Blazor-appen och se status för API-tjänster.
 ## Installation och setup
 
 1. Installera .NET 8 SDK (eller senare):
