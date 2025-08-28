@@ -27,6 +27,9 @@ yarn-error.log*
 *.db
 *.sqlite
 *.sqlite3
+	# SQLite database journal files
+	*.db-wal
+	*.db-shm
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
