@@ -20,12 +20,12 @@ namespace BudgetApp.Api.Controllers
 
         [HttpPost("upload")]
         [Authorize]
-        public async Task<IActionResult> UploadReceipt([FromForm] int transactionId, [FromForm] IFormFile file)
+        public async Task<IActionResult> UploadReceipt([FromForm] DTOs.ReceiptUploadDto dto)
         {
-            if (file == null || file.Length == 0)
+            if (dto.File == null || dto.File.Length == 0)
                 return BadRequest("Ingen fil vald.");
 
-            var result = await _service.UploadReceiptAsync(transactionId, file);
+            var result = await _service.UploadReceiptAsync(dto.TransactionId, dto.File);
             if (result == null)
                 return BadRequest("Kunde inte ladda upp kvitto.");
 
