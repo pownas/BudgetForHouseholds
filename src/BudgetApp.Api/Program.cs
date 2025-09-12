@@ -7,6 +7,7 @@ using BudgetApp.Api.Data;
 using BudgetApp.Api.Models;
 using BudgetApp.Api.Services;
 using System.Diagnostics; // added for logging
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,7 +117,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+// Use Newtonsoft for more flexible JSON handling (helps Swagger/OpenAPI serialization)
+builder.Services.AddControllers()
+    .AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -146,15 +149,32 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<BudgetApp.Api.DTOs.AddFileUploadOperationFilter>();
 });
 
+// Register Swashbuckle Newtonsoft support on IServiceCollection
+builder.Services.AddSwaggerGenNewtonsoftSupport();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
+
+// Respect reverse proxy headers (X-Forwarded-For, X-Forwarded-Proto) so generated Swagger URLs
+// and PathBase are correct when the app runs behind a proxy/tunnel.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        // Explicitly point to the generated JSON doc so the UI does not try to infer the URL
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Budget App API v1");
+        // Serve the UI at /swagger
+        options.RoutePrefix = "swagger";
+        options.DocumentTitle = "Budget App API - Swagger UI";
+    });
 }
 
 // Ensure database is created
