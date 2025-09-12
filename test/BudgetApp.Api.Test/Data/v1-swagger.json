@@ -48,6 +48,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateAccountDto"
@@ -145,6 +150,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateAccountDto"
@@ -237,6 +247,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/RegisterDto"
@@ -285,6 +300,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LoginDto"
@@ -333,6 +353,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "string"
+              }
+            },
             "application/json": {
               "schema": {
                 "type": "string"
@@ -417,6 +442,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHouseholdDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateHouseholdDto"
@@ -516,6 +546,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "string"
+              }
+            },
             "application/json": {
               "schema": {
                 "type": "string"
@@ -777,6 +812,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBankConnectionDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateBankConnectionDto"
@@ -835,6 +875,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "string"
+              }
+            },
             "application/json": {
               "schema": {
                 "type": "string"
@@ -950,16 +995,14 @@
             "name": "fromDate",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "type": "string"
             }
           },
           {
             "name": "toDate",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "type": "string"
             }
           }
         ],
@@ -1003,6 +1046,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportExternalTransactionsDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ImportExternalTransactionsDto"
@@ -1074,6 +1122,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkAccountDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/LinkAccountDto"
@@ -1132,24 +1185,21 @@
             "name": "bankConnectionId",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string"
             }
           },
           {
             "name": "fromDate",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "type": "string"
             }
           },
           {
             "name": "toDate",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "date-time"
+              "type": "string"
             }
           },
           {
@@ -1279,16 +1329,14 @@
             "name": "accountId",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string"
             }
           },
           {
             "name": "householdId",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string"
             }
           }
         ],
@@ -1330,6 +1378,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransactionDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateTransactionDto"
@@ -1427,6 +1480,11 @@
         ],
         "requestBody": {
           "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTransactionDto"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateTransactionDto"
@@ -1542,8 +1600,7 @@
             "$ref": "#/components/schemas/User"
           },
           "householdId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "household": {
@@ -1639,12 +1696,10 @@
           },
           "consentExpiresAt": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "lastSyncAt": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "errorMessage": {
@@ -1719,8 +1774,7 @@
             "$ref": "#/components/schemas/User"
           },
           "householdId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "household": {
@@ -1732,7 +1786,6 @@
           },
           "endDate": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "notificationThreshold75": {
@@ -1800,8 +1853,7 @@
             "nullable": true
           },
           "parentId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "parent": {
@@ -1818,8 +1870,7 @@
             "$ref": "#/components/schemas/User"
           },
           "householdId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "household": {
@@ -1900,8 +1951,7 @@
             "$ref": "#/components/schemas/User"
           },
           "householdId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "household": {
@@ -1918,13 +1968,11 @@
             "nullable": true
           },
           "minAmount": {
-            "type": "number",
-            "format": "double",
+            "type": "string",
             "nullable": true
           },
           "maxAmount": {
-            "type": "number",
-            "format": "double",
+            "type": "string",
             "nullable": true
           },
           "autoCategorize": {
@@ -1998,8 +2046,7 @@
             "$ref": "#/components/schemas/SharingType"
           },
           "householdId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "currentBalance": {
@@ -2078,8 +2125,7 @@
             "nullable": true
           },
           "categoryId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "notes": {
@@ -2150,8 +2196,7 @@
             "format": "double"
           },
           "availableBalance": {
-            "type": "number",
-            "format": "double",
+            "type": "string",
             "nullable": true
           },
           "currency": {
@@ -2166,8 +2211,7 @@
             "format": "date-time"
           },
           "linkedAccountId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "linkedAccountName": {
@@ -2344,12 +2388,10 @@
           },
           "fromDate": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "toDate": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           }
         },
@@ -2452,8 +2494,7 @@
             "nullable": true
           },
           "bankConnectionId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "bankName": {
@@ -2569,7 +2610,6 @@
           },
           "settledDate": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "status": {
@@ -2662,8 +2702,7 @@
             "nullable": true
           },
           "categoryId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "category": {
@@ -2688,8 +2727,7 @@
             "nullable": true
           },
           "receiptAttachmentId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "receiptAttachment": {
@@ -2871,12 +2909,10 @@
         "properties": {
           "date": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "amount": {
-            "type": "number",
-            "format": "double",
+            "type": "string",
             "nullable": true
           },
           "description": {
@@ -2888,8 +2924,7 @@
             "nullable": true
           },
           "categoryId": {
-            "type": "integer",
-            "format": "int32",
+            "type": "string",
             "nullable": true
           },
           "notes": {
@@ -2897,7 +2932,8 @@
             "nullable": true
           },
           "sharingStatus": {
-            "$ref": "#/components/schemas/SharingStatus"
+            "type": "string",
+            "nullable": true
           },
           "splits": {
             "type": "array",
@@ -2923,6 +2959,48 @@
         ],
         "type": "object",
         "properties": {
+          "firstName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "lastName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "language": {
+            "maxLength": 10,
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "maxLength": 3,
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "householdMemberships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HouseholdMember"
+            },
+            "nullable": true
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Account"
+            },
+            "nullable": true
+          },
           "id": {
             "type": "string",
             "nullable": true
@@ -2970,7 +3048,6 @@
           },
           "lockoutEnd": {
             "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "lockoutEnabled": {
@@ -2979,48 +3056,6 @@
           "accessFailedCount": {
             "type": "integer",
             "format": "int32"
-          },
-          "firstName": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "lastName": {
-            "maxLength": 100,
-            "minLength": 1,
-            "type": "string"
-          },
-          "language": {
-            "maxLength": 10,
-            "type": "string",
-            "nullable": true
-          },
-          "currency": {
-            "maxLength": 3,
-            "type": "string",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "householdMemberships": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HouseholdMember"
-            },
-            "nullable": true
-          },
-          "accounts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Account"
-            },
-            "nullable": true
           }
         },
         "additionalProperties": false
